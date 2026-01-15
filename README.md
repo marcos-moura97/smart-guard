@@ -27,11 +27,11 @@ In practice, we just used the readings of the IMU MPU-6050, to get the readings 
 
 The current repository contains 3 branches:
 
-- **master**: contains the embeeded Raspberry Pi Pico Code, written in C++. More information on how to build can be found [here]().
+- **master**: contains the embeeded Raspberry Pi Pico Code, written in C++. More information on how to build can be found [here](https://github.com/marcos-moura97/smart-guard/README.md#dependencies).
 
 - **docs**: contains the reports from INS4000 class as well as the introdutory information about the challenge. All the files are in pdf format.
 
-- **hmi**: contains the HMI code for real-time visualization of the data. More information on how to run can be found [here]().
+- **hmi**: contains the HMI code for real-time visualization of the data. More information on how to run can be found [here](https://github.com/marcos-moura97/smart-guard/README.md#how-to-run).
 
 To switch between branched you can use the command:
 
