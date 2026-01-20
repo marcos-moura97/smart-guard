@@ -29,6 +29,9 @@ set(PICO_BOARD pico CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
+# Enable warning flags
+include(warnings.cmake)
+
 project(smart_guard C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
