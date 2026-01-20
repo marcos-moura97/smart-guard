@@ -37,8 +37,8 @@ project(smart_guard C CXX ASM)
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-    simple_blink.cpp
 add_executable(smart_guard
+    #simple_blink.cpp
     #src/fall_detection_model.cpp
     src/imu/mpu6050.cpp
 )
