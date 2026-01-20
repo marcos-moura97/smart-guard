@@ -61,6 +61,7 @@ target_link_libraries(smart_guard
 # Add the standard include files to the build
 target_include_directories(smart_guard PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}
+    ./include
 )
 
 # Add any user requested libraries
