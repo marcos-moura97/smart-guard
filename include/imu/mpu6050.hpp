@@ -1,7 +1,8 @@
 #pragma once
 #include <array>
 #include <span>
-#include <imu.hpp>
+#include <cstdint>
+#include <data.hpp>
 
 class Mpu6050 final
 {

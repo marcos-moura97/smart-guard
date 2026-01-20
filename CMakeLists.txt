@@ -40,6 +40,7 @@ pico_sdk_init()
 add_executable(smart_guard
     #simple_blink.cpp
     #src/fall_detection_model.cpp
+    src/data.cpp
     src/imu/mpu6050.cpp
 )
 
