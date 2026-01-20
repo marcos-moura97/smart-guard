@@ -29,41 +29,40 @@ set(PICO_BOARD pico CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(simple_blink C CXX ASM)
+project(smart_guard C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-add_executable(simple_blink 
+add_executable(smart_guard 
     simple_blink.cpp
     fall_detection_model.cc
 )
 
-pico_set_program_name(simple_blink "simple_blink")
-pico_set_program_version(simple_blink "0.1")
+pico_set_program_name(smart_guard "smart_guard")
+pico_set_program_version(smart_guard "0.1")
 
 # Generate PIO header
-pico_generate_pio_header(simple_blink ${CMAKE_CURRENT_LIST_DIR}/blink.pio)
+pico_generate_pio_header(smart_guard ${CMAKE_CURRENT_LIST_DIR}/blink.pio)
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(simple_blink 0)
-pico_enable_stdio_usb(simple_blink 1)
+pico_enable_stdio_uart(smart_guard 0)
+pico_enable_stdio_usb(smart_guard 1)
 
 # Add the standard library to the build
-target_link_libraries(simple_blink
+target_link_libraries(smart_guard
     pico_stdlib
     hardware_i2c
 )
 
 # Add the standard include files to the build
-target_include_directories(simple_blink PUBLIC
+target_include_directories(smart_guard PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}
 )
 
 # Add any user requested libraries
-target_link_libraries(simple_blink 
+target_link_libraries(smart_guard 
     hardware_pio
 )
 
-pico_add_extra_outputs(simple_blink)
-
+pico_add_extra_outputs(smart_guard)
