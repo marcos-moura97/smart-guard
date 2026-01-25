@@ -1,11 +1,12 @@
 pkgname="smart-guard-deps"
 pkgver=1
-pkgrel=1
+pkgrel=2
 pkgdesc='Dependencies for smart-guard embedded development setup'
 arch=('any')
 depends=(
     pico-sdk
     cmake
+    ninja
     arm-none-eabi-gcc
     arm-none-eabi-newlib
     arm-none-eabi-binutils
