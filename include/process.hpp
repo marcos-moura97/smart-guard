@@ -16,8 +16,15 @@ This class can be fed into a Timer class which will run it at a regular given in
 */
 class Process
 {
+public:
+    enum class Update
+    {
+        pending,
+        done
+    };
+
 protected:
-    virtual void update(void) = 0;
+    virtual Update update(void) = 0;
 
     friend bool process_update_timer_callback(repeating_timer_t *timer);
 };
@@ -34,8 +41,18 @@ class Timer final
 private:
     using microseconds_t = std::chrono::duration<decltype(to_us_since_boot(get_absolute_time())), std::micro>;
 
+public:
+    enum class Status
+    {
+        stopped,
+        running,
+        done,
+    };
+
+private:
     std::unique_ptr<Process> _process;
     std::unique_ptr<repeating_timer_t> _timer;
+
 
 public:
     Timer(void) noexcept;
@@ -56,7 +73,8 @@ public:
 
     std::unique_ptr<Process> operator*(void) &&;
 
-    microseconds_t get_delay(void) const;
+    microseconds_t delay(void) const;
+    Status status(void) const;
 };
 
 template<typename DRepr, typename DUnit>
@@ -68,7 +86,7 @@ Timer::Timer(std::unique_ptr<Process>&& process, std::chrono::duration<DRepr, DU
 
 template<std::derived_from<Process> T, typename DRepr, typename DUnit>
 Timer::Timer(T process, std::chrono::duration<DRepr, DUnit> delay):
-    Timer(std::make_unique(std::move(process)), delay)
+    Timer(std::make_unique<T>(std::move(process)), delay)
 {
 
 }

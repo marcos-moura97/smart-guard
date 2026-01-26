@@ -7,9 +7,11 @@ Blink::Blink(void):
 
 }
 
-void Blink::update(void)
+Process::Update Blink::update(void)
 {
     this->status = !this->status;
 
     gpio_put(PICO_DEFAULT_LED_PIN, this->status);
+
+    return Update::pending;
 }

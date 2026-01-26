@@ -37,6 +37,7 @@ project(smart_guard C CXX ASM)
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+set(PROJECT_SOURCE_DIR src)
 file(GLOB_RECURSE SOURCES
   CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/*.c

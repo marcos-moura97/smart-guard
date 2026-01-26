@@ -14,5 +14,5 @@ public:
     Blink(void);
 
 protected:
-    virtual void update(void) override;
+    virtual Update update(void) override;
 };

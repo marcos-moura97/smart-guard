@@ -54,26 +54,21 @@ void FallDetector::update(void)
     }
 
     // alert button handle check
-    if (this->fall_detected) {
-        if (!gpio_get(BUTTON_GPIO)) {
+    if(this->fall_detected)
+    {
+        if(!gpio_get(BUTTON_GPIO))
+        {
             gpio_put(LED_GPIO, 0);
             this->fall_detected = false;
-        } else {
+        }
+        else
+        {
             gpio_put(LED_GPIO, 1);
         }
     }
-
-    // delay with blink
-    // TODO: either remove it (if we don't need it) or encapsulate the logic + state into a seperate class.
-    if (this->blink.elapsed >= BLINK_PERIOD)
-    {
-        this->blink.status = !blink.status;
-        gpio_put(PICO_DEFAULT_LED_PIN, blink.status);
-    }
-    this->blink.elapsed += dt;
 }
 
-FallDetector::SensorData FallDetector::measure(void)
+SensorData FallDetector::measure(void)
 {
     // Read from IMU
     ImuData imu_dat {this->device->measure_imu()};
