@@ -2,4 +2,3 @@ build
 !.vscode/*
 .cache
 .archdeps/*.pkg.tar.zst
-.vscode/c_cpp_properties.json
