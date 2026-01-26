@@ -32,7 +32,7 @@ Timer::Timer(Timer&& timer) noexcept:
     assert(!timer._timer);
 }
 
-Timer::Timer(std::unique_ptr<Process>&& process, duration_t delay):
+Timer::Timer(std::unique_ptr<Process>&& process, microseconds_t delay):
     _process(std::move(process)),
     _timer(this->_process ? std::make_unique<repeating_timer_t>(repeating_timer_t(0)) : nullptr)
 {
@@ -57,6 +57,16 @@ Timer::~Timer(void) noexcept
     }
 }
 
+Timer& Timer::operator=(std::nullptr_t)
+{
+    if(this->_timer)
+    {
+        cancel_repeating_timer(this->_timer.get());
+        this->_timer = nullptr;
+    }
+
+    return *this;
+}
 Timer& Timer::operator=(Timer&& timer)
 {
     if(this->_timer)
@@ -86,7 +96,7 @@ std::unique_ptr<Process> Timer::operator*(void) &&
     return process;
 }
 
-duration_t Timer::get_delay(void) const
+Timer::microseconds_t Timer::get_delay(void) const
 {
     if(!this->_timer)
     {
