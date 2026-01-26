@@ -13,7 +13,6 @@ add_compile_options(
     -Winfinite-recursion
     -Wmisleading-indentation
     -Werror=return-local-addr
-    -Wno-c++23-extensions
     -Werror=shadow
     -Wpointer-arith
     -Wcast-qual
@@ -42,7 +41,7 @@ add_compile_options(
     -Wmissing-include-dirs
     -Wnested-externs
     -Wpacked
-    -Wpadded
+    #-Wpadded
     -Wredundant-decls
     -Wsign-compare
     -Wstrict-overflow=5
@@ -58,7 +57,6 @@ add_compile_options(
     -Wunused-const-variable
     -Wunused-function
     -Wunused-label
-    -Wunused-local-typedef
     -Wunused-macros
     -Wunused-parameter
     -Wunused-value
@@ -72,10 +70,8 @@ add_compile_options(
 set(MAX_ERRORS 32)
 
 # Compiler specific warnings
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  add_compile_options(-fmax-errors=${MAX_ERRORS})
-  add_compile_options(-Wformat-overflow=2)
-  include(gcc_modules.cmake)
-else()
-  add_compile_options(-Wstrict-overflow)
-endif()
+add_compile_options(
+    -fmax-errors=${MAX_ERRORS}
+    -Wformat-overflow=2
+    -Wunused-local-typedefs
+)
