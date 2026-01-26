@@ -1,12 +1,13 @@
-#pragma once
-#include <imu/mpu6050.hpp>
 #include <array>
 #include <cstdio>
 #include <span>
-#include <imu.hpp>
-#include "pico/binary_info.h"
-#include "hardware/i2c.h"
-#include "hardware/gpio.h"
+
+#include <pico/binary_info.h>
+#include <hardware/i2c.h>
+#include <hardware/gpio.h>
+
+#include <data.hpp>
+#include <imu/mpu6050.hpp>
 
 Mpu6050::Mpu6050(std::uint8_t addr, std::array<float, 3>&& accel_offset, std::array<float, 3>&& gyro_offset):
     accel_offset(std::move(accel_offset)),

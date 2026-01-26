@@ -23,7 +23,7 @@ public:
     * Initialize a FIR filter with the given coefficients
     * @param numer Numerator coefficients of filter
     */
-    constexpr FirFilter(std::array<float, LENGTH>&& numer);
+    constexpr FirFilter(std::array<float, LENGTH> numer);
 
     /**
     * Runs the FIR filter SISO algorithm
@@ -36,7 +36,7 @@ public:
 // IMPL ###############################################################################################################
 
 template<std::size_t ORDER>
-constexpr FirFilter<ORDER>::FirFilter(std::array<float, LENGTH>&& numer):
+constexpr FirFilter<ORDER>::FirFilter(std::array<float, LENGTH> numer):
     numer(std::move(numer)),
     buffer()
 {
