@@ -75,8 +75,12 @@ pico_enable_stdio_usb(smart_guard 1)
 target_link_libraries(smart_guard
     pico_stdlib
     hardware_i2c
-    pico_cyw43_arch_none
 )
+if(PICO_BOARD STREQUAL "pico2_w")
+    target_link_libraries(smart_guard
+        pico_cyw43_arch_none
+    )
+endif()
 # Add the standard include files to the build
 target_include_directories(smart_guard PUBLIC
     include
