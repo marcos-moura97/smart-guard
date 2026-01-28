@@ -18,9 +18,13 @@ public:
         imu(std::move(imu))
     {
         // LEDs
+#ifdef PICO_BOARD_PICO2_W
+        gpio_init(CYW43_WL_GPIO_LED_PIN);
+        gpio_set_dir(CYW43_WL_GPIO_LED_PIN, GPIO_OUT);
+#else
         gpio_init(PICO_DEFAULT_LED_PIN);
         gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
-
+#endif
         gpio_init(LED_GPIO);
         gpio_set_dir(LED_GPIO, GPIO_OUT);
 

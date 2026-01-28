@@ -24,7 +24,8 @@ if (EXISTS ${picoVscode})
     include(${picoVscode})
 endif()
 # ====================================================================================
-set(PICO_BOARD pico CACHE STRING "Board type")
+set(PICO_BOARD pico2 CACHE STRING "Board type") # here you type either pico2 (the board with you) or pico2_w (the one with me)
+                                                # You can make this cleaner, if you want :)
 
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
@@ -33,6 +34,12 @@ include(pico_sdk_import.cmake)
 #include(warnings.cmake)
 
 project(smart_guard C CXX ASM)
+
+add_compile_definitions(
+    TF_LITE_STATIC_MEMORY
+    TF_LITE_DISABLE_X86_NEON
+    TFLITE_DISABLE_RUY
+)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
@@ -49,6 +56,11 @@ add_executable(smart_guard
     ${SOURCES}
 )
 
+if(PICO_BOARD STREQUAL "pico2_w")
+    target_compile_definitions(smart_guard PRIVATE PICO_BOARD_PICO2_W=1)
+endif()
+
+
 pico_set_program_name(smart_guard "smart_guard")
 pico_set_program_version(smart_guard "0.1")
 
@@ -64,10 +76,13 @@ target_link_libraries(smart_guard
     pico_stdlib
     hardware_i2c
 )
-
+if(PICO_BOARD STREQUAL "pico2_w")
+    target_link_libraries(smart_guard
+        pico_cyw43_arch_none
+    )
+endif()
 # Add the standard include files to the build
 target_include_directories(smart_guard PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}
     include
 )
 
