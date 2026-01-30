@@ -1,22 +1,21 @@
 #pragma once
+#include <cstdio>
 #include <hardware/gpio.h>
 #include <pico/types.h>
+
+#ifdef PICO_BOARD_PICO2_W
+#include <pico/cyw43_arch.h>
+#endif
 
 template<uint PIN>
 class Gpio
 {
 public:
-    Gpio(const Gpio<PIN>&) = delete;
-    Gpio(Gpio<PIN>&&) = delete;
-
     Gpio(void);
 
     ~Gpio(void);
 
     uint pin(void) const;
-
-    Gpio<PIN>& operator=(const Gpio<PIN>&) = delete;
-    Gpio<PIN>& operator=(Gpio<PIN>&&) = delete;
 };
 
 template<uint PIN>
@@ -53,7 +52,7 @@ uint Gpio<PIN>::pin(void) const
 template<uint PIN>
 Gpio<PIN>::~Gpio(void)
 {
-    gpio_deinit(PIN);
+    //gpio_deinit(PIN);
 }
 
 template<uint PIN>
@@ -77,5 +76,6 @@ void GpioOut<PIN>::write(bool on)
 template<uint PIN>
 void GpioOut<PIN>::toggle(void)
 {
+    printf("LED = %d", this->_on);
     this->write(!this->_on);
 }

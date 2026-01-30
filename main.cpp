@@ -13,8 +13,7 @@
 // ----------------- main -----------------
 int main()
 {
-    debug_exit();
-    /*stdio_init_all();
+    stdio_init_all();
 
 #ifdef PICO_BOARD_PICO2_W
     if (cyw43_arch_init()) {
@@ -30,7 +29,7 @@ int main()
     Timer blink(Blink(), std::chrono::seconds(1));
     while (blink.status() == Timer::Status::running) {}
 
-    std::printf("Done");*/
+    std::printf("Done");
     
     return 0; 
 }

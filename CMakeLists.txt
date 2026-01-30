@@ -24,7 +24,7 @@ if (EXISTS ${picoVscode})
     include(${picoVscode})
 endif()
 # ====================================================================================
-set(PICO_BOARD pico2 CACHE STRING "Board type") # here you type either pico2 (the board with you) or pico2_w (the one with me)
+set(PICO_BOARD pico2_w CACHE INTERNAL "") # here you type either pico2 (the board with you) or pico2_w (the one with me)
                                                 # You can make this cleaner, if you want :)
 
 # Pull in Raspberry Pi Pico SDK (must be before project)
