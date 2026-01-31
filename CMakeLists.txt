@@ -60,6 +60,14 @@ if(PICO_BOARD STREQUAL "pico2_w")
     target_compile_definitions(smart_guard PRIVATE PICO_BOARD_PICO2_W=1)
 endif()
 
+target_compile_definitions(smart_guard PRIVATE
+    #WIFI_SSID="Omni DUO_91A0B0"
+    #WIFI_PASSWORD="piece8352"
+    #WIFI_SSID="Autonomous"
+    #WIFI_PASSWORD="AutoSaiL1"
+    WIFI_SSID="OnePlus Nord2 5G"
+    WIFI_PASSWORD="12345678"
+)
 
 pico_set_program_name(smart_guard "smart_guard")
 pico_set_program_version(smart_guard "0.1")
@@ -77,9 +85,9 @@ target_link_libraries(smart_guard
     hardware_i2c
 )
 if(PICO_BOARD STREQUAL "pico2_w")
-    target_link_libraries(smart_guard
-        pico_cyw43_arch_none
-    )
+target_link_libraries(smart_guard
+    pico_cyw43_arch_lwip_threadsafe_background
+)
 endif()
 # Add the standard include files to the build
 target_include_directories(smart_guard PUBLIC
