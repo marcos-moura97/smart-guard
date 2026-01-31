@@ -1,40 +1,9 @@
 #pragma once
-#include <cstdio>
+#include <device/gpio.hpp>
 #include <hardware/gpio.h>
-#include <pico/types.h>
 
 #ifdef PICO_BOARD_PICO2_W
 #include <pico/cyw43_arch.h>
-#endif
-
-template<uint PIN>
-class Gpio
-{
-public:
-    Gpio(void);
-
-    ~Gpio(void);
-
-    uint pin(void) const;
-};
-
-template<uint PIN>
-class GpioOut : public Gpio<PIN>
-{
-private:
-    bool _on = false;
-
-public:
-    GpioOut(bool on = false);
-
-    void write(bool on);
-    void toggle(void);
-};
-
-#ifdef PICO_BOARD_PICO2_W
-    using GpioBuiltinLed = GpioOut<CYW43_WL_GPIO_LED_PIN>;
-#else
-    using GpioBuiltinLed = GpioOut<PICO_DEFAULT_LED_PIN>;
 #endif
 
 template<uint PIN>
@@ -52,6 +21,8 @@ uint Gpio<PIN>::pin(void) const
 template<uint PIN>
 Gpio<PIN>::~Gpio(void)
 {
+    // TEMP: we might want to deinit, however this may cause weird behaviour with move semantics. may need to be revisited later
+    // for now, don't deinit
     //gpio_deinit(PIN);
 }
 
@@ -76,6 +47,31 @@ void GpioOut<PIN>::write(bool on)
 template<uint PIN>
 void GpioOut<PIN>::toggle(void)
 {
-    printf("LED = %d", this->_on);
     this->write(!this->_on);
+}
+
+template<uint PIN, GpioInMode MODE>
+GpioIn<PIN, MODE>::GpioIn(void):
+    Gpio<PIN>()
+{
+    gpio_set_dir(PIN, GPIO_IN);
+    switch(MODE)
+    {
+        case GpioInMode::PullUp:
+        {
+            gpio_pull_up(PIN);
+            break;
+        }
+        case GpioInMode::PullDown:
+        {
+            gpio_pull_down(PIN);
+            break;
+        }
+    }
+}
+
+template<uint PIN, GpioInMode MODE>
+bool GpioIn<PIN, MODE>::read(void) const
+{
+    return gpio_get(PIN);
 }

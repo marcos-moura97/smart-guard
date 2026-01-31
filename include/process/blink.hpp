@@ -1,13 +1,7 @@
 #pragma once
 #include <process.hpp>
 #include <pico/types.h>
-#include <gpio.hpp>
-
-#ifdef PICO_BOARD_PICO2_W
-#include <boards/pico2_w.h>
-#else
-#include <boards/pico2.h>
-#endif
+#include <device/gpio.hpp>
 
 class Blink : public Process
 {

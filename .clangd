@@ -1,3 +1,2 @@
 CompileFlags:
   CompilationDatabase: build
-  QuotedHeaders: "include/.*"

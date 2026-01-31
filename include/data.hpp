@@ -1,9 +1,6 @@
 #pragma once
 #include <array>
 #include <cstdint>
-#include <chrono>
-
-using duration_t = std::chrono::duration<std::int64_t, std::micro>;
 
 struct ImuDataRaw final
 {

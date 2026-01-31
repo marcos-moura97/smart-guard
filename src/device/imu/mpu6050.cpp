@@ -1,0 +1,119 @@
+#include "device/i2c.hpp"
+#include <array>
+#include <bit>
+#include <memory>
+#include <span>
+#include <stdfloat>
+
+#include <pico/binary_info.h>
+#include <hardware/i2c.h>
+#include <hardware/gpio.h>
+
+#include <data.hpp>
+#include <device/imu/mpu6050.hpp>
+
+Mpu6050::Mpu6050(I2cDefault i2c, std::uint8_t addr, std::array<float, 3> accel_offset, std::array<float, 3> gyro_offset):
+    Mpu6050(std::make_shared<I2cDefault>(std::move(i2c)), addr, std::move(accel_offset), std::move(gyro_offset))
+{
+    
+}
+Mpu6050::Mpu6050(std::shared_ptr<I2cDefault> i2c, std::uint8_t addr, std::array<float, 3> accel_offset, std::array<float, 3> gyro_offset):
+    _i2c(std::move(i2c)),
+    _addr(addr),
+    _accel_offset(std::move(accel_offset)),
+    _gyro_offset(std::move(gyro_offset))
+{
+    std::printf("Hello, MPU6050! Reading raw data from registers...\n");
+    this->reset();
+    std::printf("Setup done! Starting reading.\n");
+    std::printf("ax_g,ay_g,az_g,pitch,roll,acc_smv,gyro_smv,mag_g,lying\n");
+}
+
+ImuDataRaw Mpu6050::measure_raw(void) const
+{
+    ImuDataRaw data; // Initialize with garbage, it will be overwritten
+
+    // Accel registers 0x3B..0x40 (we read 6 bytes)
+    static constexpr std::uint8_t REG_ACCEL {0x3B};
+    this->_i2c->write_blocking<std::uint8_t>(this->_addr, REG_ACCEL, true);
+    this->_i2c->read_blocking<std::uint16_t>(this->_addr, data.accel, false);
+
+    // Gyro registers 0x43..0x48
+    static constexpr uint8_t REG_GYRO {0x43};
+    this->_i2c->write_blocking<std::uint8_t>(this->_addr, REG_GYRO, true);
+    this->_i2c->read_blocking<std::uint16_t>(this->_addr, data.gyro, false);
+
+    // Temp registers 0x41..0x42
+    static constexpr uint8_t REG_TEMP {0x41};
+    this->_i2c->write_blocking<std::uint8_t>(this->_addr, REG_TEMP, true);
+    this->_i2c->read_blocking<std::uint16_t>(this->_addr, data.temp, false);
+    
+    // In case of mismatched endianness, a simple reinterpret cast is not sufficient
+    if constexpr (std::endian::native == std::endian::big)
+    {
+        // TODO: handle wrong endian (all bits need to be reversed!)
+        panic("MPU6050 support for big endian systems is not implemented");
+    }
+    
+    return data;
+}
+
+ImuData Mpu6050::measure(void) const
+{
+    ImuDataRaw raw {this->measure_raw()};
+
+    return {
+        .accel = this->accel_from_raw(raw.accel),
+        .gyro = this->gyro_from_raw(raw.gyro),
+        .temp = this->temp_from_raw(raw.temp)
+    };
+}
+
+std::array<float, 3> Mpu6050::accel_from_raw(std::span<std::uint16_t, 3> accel_raw) const
+{
+    static constexpr float SENSORS_GRAVITY_EARTH = 9.80665F;
+
+    std::array<float, 3> accel;
+    
+    for(std::size_t i {0}; i < 3; ++i)
+    {
+        accel[i] = static_cast<float>(accel_raw[i]) / 16384.0f - this->_accel_offset[i] / SENSORS_GRAVITY_EARTH;
+    }
+    
+    return accel;
+}
+
+std::array<float, 3> Mpu6050::gyro_from_raw(std::span<std::uint16_t, 3> gyro_raw) const
+{
+    // TODO: I assume this is the right constant. Maybe double check
+    static constexpr float SENSORS_DPS_TO_RADS = 0.017453293F;
+
+    std::array<float, 3> gyro;
+    
+    for(std::size_t i {0}; i < 3; ++i)
+    {
+        gyro[i] = (static_cast<float>(gyro_raw[i]) - this->_gyro_offset[i]) * SENSORS_DPS_TO_RADS;
+    }
+    
+    return gyro;
+}
+
+float Mpu6050::temp_from_raw(std::uint16_t temp_raw) const
+{
+    // TODO: Temperature is not yet used. Set to a nonzero value when needed. Idk what this would be. Check datasheet maybe.
+    static constexpr float DEG_C_PER_DPS = 0.0;
+
+    return static_cast<float>(temp_raw) * DEG_C_PER_DPS;
+}
+
+void Mpu6050::reset() const
+{
+    // TODO: What exacly do these sequences do?
+    static constexpr std::uint16_t RESET_SEQUENCE1 {0x6B80};
+    this->_i2c->write_blocking(this->_addr, RESET_SEQUENCE1, false);
+    sleep_ms(100);
+
+    static constexpr std::uint16_t RESET_SEQUENCE2 {0x6B00};
+    this->_i2c->write_blocking(this->_addr, RESET_SEQUENCE2, false);
+    sleep_ms(10);
+}
