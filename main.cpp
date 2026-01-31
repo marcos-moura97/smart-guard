@@ -42,6 +42,7 @@ int test_imu()
 // ----------------- main -----------------
 int main()
 {
+
     stdio_init_all();
 
 #ifdef PICO_BOARD_PICO2_W    
@@ -83,7 +84,7 @@ int main()
 
     Timer fall_detector(
         FallDetector(GpioButton(), GpioEmergencyLed(), std::move(imu)), 
-        std::chrono::milliseconds(20) // 50 Hz
+        std::chrono::milliseconds(200) // 50 Hz
     );
 #ifdef PICO_BOARD_PICO2_W
     Timer ping(

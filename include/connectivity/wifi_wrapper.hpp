@@ -1,3 +1,4 @@
+#pragma once
 // implement the http requests with process.hpp
 
 #ifdef PICO_BOARD_PICO2_W
