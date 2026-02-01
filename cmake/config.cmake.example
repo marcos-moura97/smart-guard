@@ -4,10 +4,3 @@ set(PICO_BOARD pico2_w CACHE INTERNAL "")
 # WiFi
 set(WIFI_SSID        "")
 set(WIFI_PASSWORD    "")
-
-# MQTT
-set(MQTT_SERVER      "")
-set(MQTT_PORT        0)
-set(MQTT_USERNAME    "")
-set(MQTT_PASSWORD    "")
-
