@@ -48,6 +48,7 @@
         "cstdint": "cpp"
     },
     "clangd.arguments": [
-        "--query-driver=${userHome}/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-gcc,${userHome}/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-g++"
+        "--query-driver=${userHome}/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-gcc,${userHome}/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-g++",
+        "--resource-dir=/home/sigurd/.pico-sdk/toolchain/14_2_Rel1/bin/../lib/gcc/arm-none-eabi/14.2.1/"
     ]
 }
