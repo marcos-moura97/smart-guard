@@ -24,14 +24,22 @@ if (EXISTS ${picoVscode})
     include(${picoVscode})
 endif()
 # ====================================================================================
-set(PICO_BOARD pico2_w CACHE INTERNAL "") # here you type either pico2 (the board with you) or pico2_w (the one with me)
-                                                # You can make this cleaner, if you want :)
-
 # Pull in Raspberry Pi Pico SDK (must be before project)
-include(pico_sdk_import.cmake)
-
+include("${CMAKE_SOURCE_DIR}/cmake/pico_sdk_import.cmake")
 # Enable warning flags
-#include(warnings.cmake)
+#include("${CMAKE_SOURCE_DIR}/cmake/warnings.cmake")
+#
+if(EXISTS "${CMAKE_SOURCE_DIR}/cmake/config.cmake")
+    include("${CMAKE_SOURCE_DIR}/cmake/config.cmake")
+else()
+    message(WARNING 
+        "Missing config.cmake\n"
+        "Some variables can be missing. Create cmake/config.cmake from cmake/config.cmake.example"
+    )
+endif()
+if(NOT DEFINED PICO_BOARD)
+    set(PICO_BOARD pico2_w CACHE INTERNAL "")
+endif()
 
 project(smart_guard C CXX ASM)
 
@@ -57,17 +65,12 @@ add_executable(smart_guard
 )
 
 if(PICO_BOARD STREQUAL "pico2_w")
-    target_compile_definitions(smart_guard PRIVATE PICO_BOARD_PICO2_W=1)
+    target_compile_definitions(smart_guard PRIVATE 
+        PICO_BOARD_PICO2_W=1
+        WIFI_SSID="${WIFI_SSID}"
+        WIFI_PASSWORD="${WIFI_PASSWORD}"
+    )
 endif()
-
-target_compile_definitions(smart_guard PRIVATE
-    #WIFI_SSID="Omni DUO_91A0B0"
-    #WIFI_PASSWORD="piece8352"
-    #WIFI_SSID="Autonomous"
-    #WIFI_PASSWORD="AutoSaiL1"
-    WIFI_SSID="OnePlus Nord2 5G"
-    WIFI_PASSWORD="12345678"
-)
 
 pico_set_program_name(smart_guard "smart_guard")
 pico_set_program_version(smart_guard "0.1")

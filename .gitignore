@@ -2,3 +2,4 @@ build
 !.vscode/*
 .cache
 .archdeps/*.pkg.tar.zst
+cmake/config.cmake
