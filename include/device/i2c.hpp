@@ -18,9 +18,15 @@ public:
     using addr_t = std::uint8_t;
 private:
 
+    struct I2cDevice
+    {
+        I2cDevice();
+    };
+
     using sda_t = GpioI2c<PIN_SDA>;
     using scl_t = GpioI2c<PIN_SCL>;
 
+    I2cDevice _i2c_dev;
     sda_t _sda;
     scl_t _scl;
 
