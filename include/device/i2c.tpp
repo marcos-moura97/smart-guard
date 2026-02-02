@@ -11,11 +11,17 @@ GpioI2c<PIN>::GpioI2c(void):
 }
 
 template<i2c_inst_t* I2C, uint PIN_SDA, uint PIN_SCL, uint BAUD_RATE>
+I2c<I2C, PIN_SDA, PIN_SCL, BAUD_RATE>::I2cDevice::I2cDevice(void)
+{
+    i2c_init(I2C, BAUD_RATE);
+}
+
+template<i2c_inst_t* I2C, uint PIN_SDA, uint PIN_SCL, uint BAUD_RATE>
 I2c<I2C, PIN_SDA, PIN_SCL, BAUD_RATE>::I2c(void):
+    _i2c_dev(),
     _sda(),
     _scl()
 {
-    i2c_init(I2C, BAUD_RATE);
     bi_decl(bi_2pins_with_func(PICO_DEFAULT_I2C_SDA_PIN, PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C));
 }
 

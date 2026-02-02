@@ -2,6 +2,7 @@
 #include "device/i2c.hpp"
 #include "process/fall_detector.hpp"
 #include <chrono>
+#include <cstdio>
 #include <device/imu/mpu6050.hpp>
 #include <device/timer.hpp>
 #include <memory>
@@ -55,10 +56,11 @@ int main()
         Blink(),
         std::chrono::seconds(1) // 1 Hz
     );
-    Timer fall_detector(
+
+    /*Timer fall_detector(
         FallDetector(GpioButton(), GpioEmergencyLed(), std::move(imu)), 
         std::chrono::milliseconds(20) // 60 Hz
-    );
+    );*/
 #ifdef PICO_BOARD_PICO2_W
     Timer ping(
         Ping([&mqtt]() { mqtt.publish_ping(); }),
@@ -66,7 +68,10 @@ int main()
     );
 #endif
 
-    while (blink.status() == Timer::Status::running || fall_detector.status() == Timer::Status::running) {}
+    while (blink.status() == Timer::Status::running/* || fall_detector.status() == Timer::Status::running*/)
+    {
+        
+    }
 
     std::printf("Done");
     
