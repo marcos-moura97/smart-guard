@@ -22,7 +22,7 @@ I2c<I2C, PIN_SDA, PIN_SCL, BAUD_RATE>::I2c(void):
     _sda(),
     _scl()
 {
-    bi_decl(bi_2pins_with_func(PICO_DEFAULT_I2C_SDA_PIN, PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C));
+    bi_decl(bi_2pins_with_func(PIN_SDA, PIN_SCL, GPIO_FUNC_I2C));
 }
 
 template<i2c_inst_t* I2C, uint PIN_SDA, uint PIN_SCL, uint BAUD_RATE>
