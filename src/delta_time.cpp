@@ -1,8 +1,9 @@
 #include <delta_time.hpp>
+#include <pico/time.h>
 
 DeltaTime::DeltaTime(void):
     _delta_time(duration_t::zero()),
-    _time(std::chrono::system_clock::now())
+    _time(get_absolute_time())
 {
 
 }
@@ -10,8 +11,8 @@ DeltaTime::DeltaTime(void):
 void DeltaTime::tick(void)
 {
     time_point_t time {this->_time};
-    this->_time = std::chrono::system_clock::now();
-    this->_delta_time = std::chrono::duration_cast<duration_t>(time - this->_time);
+    this->_time = get_absolute_time();
+    this->_delta_time = duration_t(absolute_time_diff_us(time, this->_time));
 }
 DeltaTime::duration_t DeltaTime::dt(void) const
 {

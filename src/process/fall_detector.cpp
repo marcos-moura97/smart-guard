@@ -1,4 +1,5 @@
 #include "device/imu/mpu6050.hpp"
+#include <cstdio>
 #include <data.hpp>
 #include <delta_time.hpp>
 #include <cassert>
@@ -120,13 +121,13 @@ void FallDetector::analyze(const SensorData& sensor_data)
         if(!this->events.free_fall->is_free_fall && this->events.free_fall->elapsed >= this->FREE_FALL_TRIGGER_TIME)
         {
             this->events.free_fall->is_free_fall = true;
-            //printf("Event: FREE FALL\n");
+            std::printf("Event: FREE FALL\n");
         }
     }
 
     // 4) IMPACT detection
-    //const bool is_lying_now {std::abs(ax_g) < IS_LYING_THRESHOLD && std::abs(az_g) > IS_LYING_THRESHOLD}; // rectangular (original)
-    const bool is_lying_now {ax_g*ax_g + az_g*az_g > this->IS_LYING_THRESHOLD*this->IS_LYING_THRESHOLD}; // circular (not tested)
+    const bool is_lying_now {std::abs(ax_g) < IS_LYING_THRESHOLD && std::abs(az_g) > IS_LYING_THRESHOLD}; // rectangular (original)
+    //const bool is_lying_now {ax_g*ax_g + az_g*az_g > this->IS_LYING_THRESHOLD*this->IS_LYING_THRESHOLD}; // circular (not tested)
     if(this->events.impact.has_value())
     {
         this->events.impact->elapsed += this->delta_time.dt();
@@ -141,11 +142,10 @@ void FallDetector::analyze(const SensorData& sensor_data)
             .was_lying_at_impact = is_lying_now,
             .is_tilt_change = false
         };
-        //printf("Event: IMPACT  mag=%.2f\n", mag_g);
+        std::printf("Event: IMPACT  mag=%.2f\n", mag_g);
     }
 
     // 5) POSTURE CHANGE within 500ms
-    // NOTE: the logic here has changed slightly from the 2025 version. I noticed the impact event never gets unset. Maybe revert if it doesn't work...
     if(this->events.tilt_change.has_value())
     {
         this->events.tilt_change->elapsed += this->delta_time.dt();
@@ -154,12 +154,8 @@ void FallDetector::analyze(const SensorData& sensor_data)
             if(!this->events.tilt_change->is_tilt_change && (is_lying_now != this->events.tilt_change->was_lying_at_impact)) // TODO: Double check this logic
             {
                 this->events.tilt_change->is_tilt_change = true;
-                //printf("Event: POSTURE CHANGE\n");
+                std::printf("Event: POSTURE CHANGE\n");
             }
-        }
-        else
-        {
-            this->events.impact = std::nullopt;
         }
     }
 
@@ -178,7 +174,7 @@ void FallDetector::analyze(const SensorData& sensor_data)
             this->events.post_fall = {
                 .elapsed {microseconds_t::zero()}
             };
-            //printf("Entering post-fall monitoring...\n");
+            std::printf("Entering post-fall monitoring...\n");
         }
     }
 }
