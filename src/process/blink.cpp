@@ -9,14 +9,14 @@
 Blink::Blink(void):
     _led(false)
 {
-    printf("Blink process started!");
+    //printf("Blink process started!");
 }
 
 Process::Update Blink::update(void)
 {
     this->_led.toggle();
 
-    printf("Blinking!");
+    //printf("Blinking!");
 
     return Update::pending;
 }
