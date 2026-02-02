@@ -1,35 +1,33 @@
 #pragma once
-#include "device/i2c.hpp"
-#include <array>
-#include <span>
-#include <cstdint>
+#include <device/i2c.hpp>
 #include <data.hpp>
+#include <array>
 #include <memory>
 
 class Mpu6050 final
 {
 public:
-    using i2c_t = I2cDefault;
+    static constexpr uint BAUD_RATE {400 * 1000};
+
+    using i2c_t = I2cDefault<BAUD_RATE>;
 
 private:
     // MPU6050 I2C address
-    const std::shared_ptr<I2cDefault> _i2c;
-    const std::uint8_t _addr;
+    std::shared_ptr<i2c_t> _i2c;
+    std::uint8_t _addr;
 
-    const std::array<float, 3> _accel_offset;
-    const std::array<float, 3> _gyro_offset;
+    std::array<float, 3> _accel_offset;
+    std::array<float, 3> _gyro_offset;
     
 public:
-    Mpu6050(void) = delete;
-
     Mpu6050(
-        I2cDefault i2c,
+        i2c_t i2c,
         std::uint8_t addr,
         std::array<float, 3> accel_offset,
         std::array<float, 3> gyro_offset
     );
     Mpu6050(
-        std::shared_ptr<I2cDefault> i2c,
+        std::shared_ptr<i2c_t> i2c,
         std::uint8_t addr,
         std::array<float, 3> accel_offset,
         std::array<float, 3> gyro_offset

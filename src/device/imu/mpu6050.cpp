@@ -1,23 +1,12 @@
-#include "device/i2c.hpp"
-#include <array>
-#include <bit>
-#include <memory>
-#include <span>
-#include <stdfloat>
-
-#include <pico/binary_info.h>
-#include <hardware/i2c.h>
-#include <hardware/gpio.h>
-
-#include <data.hpp>
+#include "data.hpp"
 #include <device/imu/mpu6050.hpp>
 
-Mpu6050::Mpu6050(I2cDefault i2c, std::uint8_t addr, std::array<float, 3> accel_offset, std::array<float, 3> gyro_offset):
-    Mpu6050(std::make_shared<I2cDefault>(std::move(i2c)), addr, std::move(accel_offset), std::move(gyro_offset))
+Mpu6050::Mpu6050(i2c_t i2c, std::uint8_t addr, std::array<float, 3> accel_offset, std::array<float, 3> gyro_offset):
+    Mpu6050(std::make_shared<i2c_t>(std::move(i2c)), addr, std::move(accel_offset), std::move(gyro_offset))
 {
     
 }
-Mpu6050::Mpu6050(std::shared_ptr<I2cDefault> i2c, std::uint8_t addr, std::array<float, 3> accel_offset, std::array<float, 3> gyro_offset):
+Mpu6050::Mpu6050(std::shared_ptr<i2c_t> i2c, std::uint8_t addr, std::array<float, 3> accel_offset, std::array<float, 3> gyro_offset):
     _i2c(std::move(i2c)),
     _addr(addr),
     _accel_offset(std::move(accel_offset)),
@@ -31,6 +20,16 @@ Mpu6050::Mpu6050(std::shared_ptr<I2cDefault> i2c, std::uint8_t addr, std::array<
 
 ImuDataRaw Mpu6050::measure_raw(void) const
 {
+    if(!this->_i2c)
+    {
+        // Return all zeroes if no i2c interface exists
+        return ImuDataRaw {
+            .accel = {0, 0, 0},
+            .gyro = {0, 0 , 0},
+            .temp = 0
+        };
+    }
+
     ImuDataRaw data; // Initialize with garbage, it will be overwritten
 
     // Accel registers 0x3B..0x40 (we read 6 bytes)
@@ -39,12 +38,12 @@ ImuDataRaw Mpu6050::measure_raw(void) const
     this->_i2c->read_blocking<std::uint16_t>(this->_addr, data.accel, false);
 
     // Gyro registers 0x43..0x48
-    static constexpr uint8_t REG_GYRO {0x43};
+    static constexpr std::uint8_t REG_GYRO {0x43};
     this->_i2c->write_blocking<std::uint8_t>(this->_addr, REG_GYRO, true);
     this->_i2c->read_blocking<std::uint16_t>(this->_addr, data.gyro, false);
 
     // Temp registers 0x41..0x42
-    static constexpr uint8_t REG_TEMP {0x41};
+    static constexpr std::uint8_t REG_TEMP {0x41};
     this->_i2c->write_blocking<std::uint8_t>(this->_addr, REG_TEMP, true);
     this->_i2c->read_blocking<std::uint16_t>(this->_addr, data.temp, false);
     
@@ -108,6 +107,12 @@ float Mpu6050::temp_from_raw(std::uint16_t temp_raw) const
 
 void Mpu6050::reset() const
 {
+    if(!this->_i2c)
+    {
+        // Do nothing if no I2C interface exists
+        return;
+    }
+
     // TODO: What exacly do these sequences do?
     static constexpr std::uint16_t RESET_SEQUENCE1 {0x6B80};
     this->_i2c->write_blocking(this->_addr, RESET_SEQUENCE1, false);
