@@ -57,10 +57,10 @@ int main()
         std::chrono::seconds(1) // 1 Hz
     );
 
-    /*Timer fall_detector(
+    Timer fall_detector(
         FallDetector(GpioButton(), GpioEmergencyLed(), std::move(imu)), 
         std::chrono::milliseconds(20) // 60 Hz
-    );*/
+    );
 #ifdef PICO_BOARD_PICO2_W
     Timer ping(
         Ping([&mqtt]() { mqtt.publish_ping(); }),
