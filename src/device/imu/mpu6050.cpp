@@ -114,12 +114,13 @@ void Mpu6050::reset() const
         return;
     }
 
-    // TODO: What exacly do these sequences do?
-    static constexpr std::uint16_t RESET_SEQUENCE1 {0x6B80};
-    this->_i2c->write_blocking(this->_addr, RESET_SEQUENCE1, false);
+    // Resets
+    static constexpr std::uint16_t RESET {0x6B80};
+    this->_i2c->write_blocking(this->_addr, RESET, false);
     sleep_ms(100);
 
-    static constexpr std::uint16_t RESET_SEQUENCE2 {0x6B00};
-    this->_i2c->write_blocking(this->_addr, RESET_SEQUENCE2, false);
+    // Configures internal clock
+    static constexpr std::uint16_t RUN_INTERNAL_CLOCK {0x6B00};
+    this->_i2c->write_blocking(this->_addr, RUN_INTERNAL_CLOCK, false);
     sleep_ms(10);
 }
