@@ -38,10 +38,10 @@ int main()
 
     Timer fall_detector(
         FallDetector(GpioButton(), GpioEmergencyLed(), std::move(imu)), 
-        std::chrono::microseconds(1000000/60) // 60 Hz
+        std::chrono::milliseconds(20) // 50 Hz
     );
 
-    while (blink.status() == Timer::Status::running/* || fall_detector.status() == Timer::Status::running*/)
+    while (blink.status() == Timer::Status::running || fall_detector.status() == Timer::Status::running)
     {
         
     }

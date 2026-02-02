@@ -35,9 +35,9 @@ public:
 
     ImuData measure(void) const;
 
-private:
     ImuDataRaw measure_raw(void) const;
     
+private:
     /// Acceleration from PCM to g
     std::array<float, 3> accel_from_raw(std::span<std::uint16_t, 3> accel_raw) const;
 
@@ -48,4 +48,6 @@ private:
     float temp_from_raw(std::uint16_t temp_raw) const;
 
     void reset() const;
+
+    static void swap_msb_lsb(std::uint16_t& x);
 };
