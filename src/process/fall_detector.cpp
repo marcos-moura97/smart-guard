@@ -279,3 +279,20 @@ Direction FallDetector::filter_direction(Direction direction, const ImuData& imu
 
     return direction;
 }
+
+bool FallDetector::Events::is_free_fall(void) const
+{
+    return this->free_fall.has_value() && this->free_fall->is_free_fall;
+}
+bool FallDetector::Events::is_impact(void) const
+{
+    return this->impact.has_value();
+}
+bool FallDetector::Events::is_tilt_change(void) const
+{
+    return this->tilt_change.has_value() && this->tilt_change->is_tilt_change;
+}
+bool FallDetector::Events::is_monitoring_post_fall(void) const
+{
+    return this->post_fall.has_value();
+}

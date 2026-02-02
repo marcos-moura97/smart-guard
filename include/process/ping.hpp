@@ -1,7 +1,7 @@
 #pragma once
 #include <process.hpp>
 #include <pico/types.h>
-#include <gpio.hpp>
+#include <device/gpio.hpp>
 #include <functional>
 
 #ifdef PICO_BOARD_PICO2_W

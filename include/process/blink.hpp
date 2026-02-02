@@ -6,7 +6,7 @@
 class Blink : public Process
 {
 private:
-    GpioBuiltinLed _led;
+    BuiltinLed _led;
 public:
     Blink(void);
 
