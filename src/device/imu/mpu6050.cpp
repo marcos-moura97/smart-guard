@@ -115,12 +115,12 @@ void Mpu6050::reset() const
     }
 
     // Resets
-    static constexpr std::uint16_t RESET {0x6B80};
+    static constexpr std::array<std::uint8_t, 2> RESET {0x6B, 0x80};
     this->_i2c->write_blocking(this->_addr, RESET, false);
-    sleep_ms(100);
+    sleep_ms(1000);
 
     // Configures internal clock
-    static constexpr std::uint16_t RUN_INTERNAL_CLOCK {0x6B00};
+    static constexpr std::array<std::uint8_t, 2> RUN_INTERNAL_CLOCK {0x6B, 0x00};
     this->_i2c->write_blocking(this->_addr, RUN_INTERNAL_CLOCK, false);
     sleep_ms(10);
 }

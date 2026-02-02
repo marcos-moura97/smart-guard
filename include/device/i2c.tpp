@@ -2,6 +2,15 @@
 #include <device/i2c.hpp>
 #include <pico/binary_info/code.h>
 
+template<i2c_inst_t* I2C, uint PIN_SDA, uint PIN_SCL, uint BAUD_RATE>
+I2c<I2C, PIN_SDA, PIN_SCL, BAUD_RATE>::I2c(void):
+    _i2c_dev(),
+    _sda(),
+    _scl()
+{
+    bi_decl(bi_2pins_with_func(PIN_SDA, PIN_SCL, GPIO_FUNC_I2C));
+}
+
 template<uint PIN>
 GpioI2c<PIN>::GpioI2c(void):
     Gpio<PIN>()
@@ -14,15 +23,6 @@ template<i2c_inst_t* I2C, uint PIN_SDA, uint PIN_SCL, uint BAUD_RATE>
 I2c<I2C, PIN_SDA, PIN_SCL, BAUD_RATE>::I2cDevice::I2cDevice(void)
 {
     i2c_init(I2C, BAUD_RATE);
-}
-
-template<i2c_inst_t* I2C, uint PIN_SDA, uint PIN_SCL, uint BAUD_RATE>
-I2c<I2C, PIN_SDA, PIN_SCL, BAUD_RATE>::I2c(void):
-    _i2c_dev(),
-    _sda(),
-    _scl()
-{
-    bi_decl(bi_2pins_with_func(PIN_SDA, PIN_SCL, GPIO_FUNC_I2C));
 }
 
 template<i2c_inst_t* I2C, uint PIN_SDA, uint PIN_SCL, uint BAUD_RATE>
