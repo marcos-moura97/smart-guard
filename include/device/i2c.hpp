@@ -35,13 +35,9 @@ public:
 
     template<typename T>
     void write_blocking(addr_t addr, const T& src, bool nostop) const;
-    template<typename T>
-    void write_blocking(addr_t addr, std::span<const T> src, bool nostop) const;
 
     template<typename T>
-    void read_blocking(addr_t addr, T dst, bool nostop) const;
-    template<typename T>
-    void read_blocking(addr_t addr, std::span<T> dst, bool nostop) const;
+    void read_blocking(addr_t addr, T& dst, bool nostop) const;
 };
 
 #if defined(i2c_default) && defined(PICO_DEFAULT_I2C_SDA_PIN) && defined(PICO_DEFAULT_I2C_SCL_PIN)

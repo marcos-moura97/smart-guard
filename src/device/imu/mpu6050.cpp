@@ -35,18 +35,18 @@ ImuDataRaw Mpu6050::measure_raw(void) const
 
     // Accel registers 0x3B..0x40 (we read 6 bytes)
     static constexpr std::uint8_t REG_ACCEL {0x3B};
-    this->_i2c->write_blocking<std::uint8_t>(this->_addr, REG_ACCEL, true);
-    this->_i2c->read_blocking<std::uint16_t>(this->_addr, data.accel, false);
+    this->_i2c->write_blocking(this->_addr, REG_ACCEL, true);
+    this->_i2c->read_blocking(this->_addr, data.accel, false);
 
     // Gyro registers 0x43..0x48
     static constexpr std::uint8_t REG_GYRO {0x43};
-    this->_i2c->write_blocking<std::uint8_t>(this->_addr, REG_GYRO, true);
-    this->_i2c->read_blocking<std::uint16_t>(this->_addr, data.gyro, false);
+    this->_i2c->write_blocking(this->_addr, REG_GYRO, true);
+    this->_i2c->read_blocking(this->_addr, data.gyro, false);
 
     // Temp registers 0x41..0x42
     static constexpr std::uint8_t REG_TEMP {0x41};
-    this->_i2c->write_blocking<std::uint8_t>(this->_addr, REG_TEMP, true);
-    this->_i2c->read_blocking<std::uint16_t>(this->_addr, data.temp, false);
+    this->_i2c->write_blocking(this->_addr, REG_TEMP, true);
+    this->_i2c->read_blocking(this->_addr, data.temp, false);
     
     // In case of mismatched endianness, a simple reinterpret cast is not sufficient
     if constexpr (std::endian::native == std::endian::big)

@@ -32,7 +32,7 @@ void I2c<I2C, PIN_SDA, PIN_SCL, BAUD_RATE>::write_blocking(addr_t addr, const T&
     i2c_write_blocking(
         I2C,
         addr,
-        reinterpret_cast<const std::uint8_t*>(src),
+        reinterpret_cast<const std::uint8_t*>(&src),
         sizeof(T),
         nostop
     );
@@ -40,39 +40,13 @@ void I2c<I2C, PIN_SDA, PIN_SCL, BAUD_RATE>::write_blocking(addr_t addr, const T&
 
 template<i2c_inst_t* I2C, uint PIN_SDA, uint PIN_SCL, uint BAUD_RATE>
 template<typename T>
-void I2c<I2C, PIN_SDA, PIN_SCL, BAUD_RATE>::write_blocking(addr_t addr, std::span<const T> src, bool nostop) const
-{
-    i2c_write_blocking(
-        I2C,
-        addr,
-        reinterpret_cast<const std::uint8_t*>(src.data()),
-        src.size_bytes(),
-        nostop
-    );
-}
-
-template<i2c_inst_t* I2C, uint PIN_SDA, uint PIN_SCL, uint BAUD_RATE>
-template<typename T>
-void I2c<I2C, PIN_SDA, PIN_SCL, BAUD_RATE>::read_blocking(addr_t addr, T dst, bool nostop) const
+void I2c<I2C, PIN_SDA, PIN_SCL, BAUD_RATE>::read_blocking(addr_t addr, T& dst, bool nostop) const
 {
     i2c_read_blocking(
         I2C,
         addr,
-        reinterpret_cast<std::uint8_t*>(dst),
+        reinterpret_cast<std::uint8_t*>(&dst),
         sizeof(T),
-        nostop
-    );
-}
-
-template<i2c_inst_t* I2C, uint PIN_SDA, uint PIN_SCL, uint BAUD_RATE>
-template<typename T>
-void I2c<I2C, PIN_SDA, PIN_SCL, BAUD_RATE>::read_blocking(addr_t addr, std::span<T> dst, bool nostop) const
-{
-    i2c_read_blocking(
-        I2C,
-        addr,
-        reinterpret_cast<std::uint8_t*>(dst.data()),
-        dst.size_bytes(),
         nostop
     );
 }
