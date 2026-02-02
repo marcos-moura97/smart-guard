@@ -67,6 +67,10 @@ $ pip install -r requirements.txt
 
 You can follow the steps of Chapter 5 in [this tutorial](https://pip-assets.raspberrypi.com/categories/610-raspberry-pi-pico/documents/RP-008276-DS-1-getting-started-with-pico.pdf?disposition=inline) as example, but basically you just need to click **Run Project (USB)** once the raspberry is in flash mode.
 
+### udev rules (Linux)
+
+Copy the contents of [`60-picotool.rules`](https://github.com/raspberrypi/picotool/blob/master/udev/60-picotool.rules) to `/etc/udev/rules.d/60-picotool.rules`. This may be needed for setting the right permissions for the device (typically `/dev/ttyACM0`).
+
 ### HMI
 
 First, change to the hmi branch:
