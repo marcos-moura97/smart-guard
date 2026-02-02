@@ -37,16 +37,25 @@ ImuDataRaw Mpu6050::measure_raw(void) const
     static constexpr std::uint8_t REG_ACCEL {0x3B};
     this->_i2c->write_blocking(this->_addr, REG_ACCEL, true);
     this->_i2c->read_blocking(this->_addr, data.accel, false);
+    for(std::uint16_t& a : data.accel)
+    {
+        this->swap_msb_lsb(a);
+    }
 
     // Gyro registers 0x43..0x48
     static constexpr std::uint8_t REG_GYRO {0x43};
     this->_i2c->write_blocking(this->_addr, REG_GYRO, true);
     this->_i2c->read_blocking(this->_addr, data.gyro, false);
+    for(std::uint16_t& g : data.gyro)
+    {
+        this->swap_msb_lsb(g);
+    }
 
     // Temp registers 0x41..0x42
     static constexpr std::uint8_t REG_TEMP {0x41};
     this->_i2c->write_blocking(this->_addr, REG_TEMP, true);
     this->_i2c->read_blocking(this->_addr, data.temp, false);
+    this->swap_msb_lsb(data.temp);
     
     // In case of mismatched endianness, a simple reinterpret cast is not sufficient
     if constexpr (std::endian::native == std::endian::big)
@@ -123,4 +132,11 @@ void Mpu6050::reset() const
     static constexpr std::array<std::uint8_t, 2> RUN_INTERNAL_CLOCK {0x6B, 0x00};
     this->_i2c->write_blocking(this->_addr, RUN_INTERNAL_CLOCK, false);
     sleep_ms(10);
+}
+
+void Mpu6050::swap_msb_lsb(std::uint16_t& x)
+{
+    std::uint8_t* msb {reinterpret_cast<std::uint8_t*>(&x)};
+    std::uint8_t* lsb {msb + 1};
+    std::swap(*msb, *lsb);
 }

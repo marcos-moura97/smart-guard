@@ -59,7 +59,7 @@ int main()
 
     Timer fall_detector(
         FallDetector(GpioButton(), GpioEmergencyLed(), std::move(imu)), 
-        std::chrono::milliseconds(20) // 60 Hz
+        std::chrono::milliseconds(20) // 50 Hz
     );
 #ifdef PICO_BOARD_PICO2_W
     Timer ping(
@@ -68,7 +68,7 @@ int main()
     );
 #endif
 
-    while (blink.status() == Timer::Status::running/* || fall_detector.status() == Timer::Status::running*/)
+    while (blink.status() == Timer::Status::running || fall_detector.status() == Timer::Status::running)
     {
         
     }
