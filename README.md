@@ -71,6 +71,8 @@ You can follow the steps of Chapter 5 in [this tutorial](https://pip-assets.rasp
 
 Copy the contents of [`60-picotool.rules`](https://github.com/raspberrypi/picotool/blob/master/udev/60-picotool.rules) to `/etc/udev/rules.d/60-picotool.rules`. This may be needed for setting the right permissions for the device (typically `/dev/ttyACM0`).
 
+Run `sudo dmesg --follow` to confirm wether or not the device is being recognized. If the device descriptor is not being recognized, you may need to use a USB 3.0 / SuperSpeed USB port.
+
 ### HMI
 
 First, change to the hmi branch:
