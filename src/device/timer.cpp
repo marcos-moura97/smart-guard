@@ -98,3 +98,10 @@ Timer::Status Timer::status(void) const
     }
     return Status::stopped;
 }
+void Timer::join(void) const
+{
+    while(this->status() == Status::running)
+    {
+
+    }
+}
