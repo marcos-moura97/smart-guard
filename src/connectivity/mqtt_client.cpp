@@ -72,6 +72,10 @@ bool MqttClient::resolveAndConnect(const char* hostname) {
     }
 }
 
+void MqttClient::publish_ping(){
+    bool status = publish("/ping", "helloworld", 0, MQTT_PUBLISH_RETAIN, /*treat_as_basic_topic=*/true);
+}
+
 bool MqttClient::publish(const char* name_or_full_topic,
                 const char* payload,
                 u8_t qos,
@@ -80,10 +84,9 @@ bool MqttClient::publish(const char* name_or_full_topic,
 {
 
     cyw43_arch_lwip_begin();
-    if (!client_ || !mqtt_client_is_connected(client_)) {
-        return false;
-    }
+    bool ok = client_ && mqtt_client_is_connected(client_);
     cyw43_arch_lwip_end();
+    if (!ok) return false;
 
     char topic_buf[MQTT_TOPIC_LEN];
     const char* topic_to_use = name_or_full_topic;

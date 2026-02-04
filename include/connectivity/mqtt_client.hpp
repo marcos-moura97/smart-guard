@@ -79,6 +79,7 @@ public:
                  u8_t retain = MQTT_PUBLISH_RETAIN,
                  bool treat_as_basic_topic = true);
     bool publishPayload(const char* payload);
+    void publish_ping();
     bool subscribe(const char* name, u8_t qos = MQTT_SUBSCRIBE_QOS);
     bool waitUntilConnected(uint32_t timeout_ms) const;
     void stop();
