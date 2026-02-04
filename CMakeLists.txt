@@ -7,6 +7,9 @@ set(CMAKE_CXX_STANDARD 20) # previously set to 17
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 set(CMAKE_CXX_EXTENSIONS ON)
 
+set(PICO_CYW43_ARCH_THREADSAFE_BACKGROUND 1)
+unset(PICO_PLATFORM CACHE)
+
 # Initialise pico_sdk from installed location
 # (note this can come from environment, CMake cache etc)
 
@@ -17,7 +20,7 @@ else()
     set(USERHOME $ENV{HOME})
 endif()
 set(sdkVersion 2.2.0)
-set(toolchainVersion 14_2_Rel1)
+set(toolchainVersion RISCV_ZCB_RPI_2_2_0_3)
 set(picotoolVersion 2.2.0-a4)
 set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
 if (EXISTS ${picoVscode})
@@ -69,6 +72,11 @@ if(PICO_BOARD STREQUAL "pico2_w")
         PICO_BOARD_PICO2_W=1
         WIFI_SSID="${WIFI_SSID}"
         WIFI_PASSWORD="${WIFI_PASSWORD}"
+        MQTT_SERVER="${MQTT_SERVER}"
+        MQTT_PORT_=${MQTT_PORT_}
+        MQTT_TLS_PORT=${MQTT_TLS_PORT}
+        MQTT_USERNAME="${MQTT_USERNAME}"
+        MQTT_PASSWORD="${MQTT_PASSWORD}"
     )
 endif()
 
@@ -90,6 +98,9 @@ target_link_libraries(smart_guard
 if(PICO_BOARD STREQUAL "pico2_w")
 target_link_libraries(smart_guard
     pico_cyw43_arch_lwip_threadsafe_background
+    pico_lwip_mqtt
+    pico_mbedtls
+    pico_lwip_mbedtls
 )
 endif()
 # Add the standard include files to the build
