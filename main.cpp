@@ -44,7 +44,9 @@ int main()
     Mpu6050 imu(0x68, {-0.3f, -0.2f, -0.9f}, {-3.5f, 0.0f, -1.5f});
     Pico device(std::move(imu));
     Timer blink(Blink(), std::chrono::seconds(1));
+#ifdef PICO_BOARD_PICO2_W
     Timer ping(Ping([&mqtt]() { mqtt.publish_ping(); }), std::chrono::seconds(1));
+#endif
     while (blink.status() == Timer::Status::running) {}
 
     std::printf("Done");
