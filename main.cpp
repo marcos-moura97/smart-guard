@@ -93,7 +93,13 @@ int main()
     );
 #endif
 
-    while (blink.status() == Timer::Status::running || fall_detector.status() == Timer::Status::running)
+    while (
+        blink.status() == Timer::Status::running
+        || fall_detector.status() == Timer::Status::running
+#ifdef PICO_BOARD_PICO2_W
+        || ping.status() == Timer::Status::running
+#endif
+    )
     {
         
     }
