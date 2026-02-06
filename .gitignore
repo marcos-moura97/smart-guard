@@ -2,4 +2,5 @@ build
 !.vscode/*
 .cache
 .archdeps/*.pkg.tar.zst
-cmake/config.cmake
+board.cmake
+misc/bootselBoot
