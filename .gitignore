@@ -3,3 +3,4 @@ build
 .cache
 .archdeps/*.pkg.tar.zst
 board.cmake
+misc/bootselBoot
