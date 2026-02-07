@@ -48,9 +48,14 @@ int main(int argc, const char * argv[])
     
     libusb_device_handle    *handle;
     uint16_t    vendor_id = 0x2E8A;
-    uint16_t    product_id = 0x000A;
+    uint16_t    product_id_pico = 0x000A;
+    uint16_t    product_id_pico2_w = 0x000F;
 
-    handle = libusb_open_device_with_vid_pid(NULL, vendor_id, product_id);
+    handle = libusb_open_device_with_vid_pid(NULL, vendor_id, product_id_pico);
+    if (handle == NULL)
+    {
+        handle = libusb_open_device_with_vid_pid(NULL, vendor_id, product_id_pico2_w);
+    }
     if (handle == NULL) {
         fprintf(stderr, "No pico device available or a device has no standard pico_stdio_usb module.\n");
         libusb_exit(NULL);
