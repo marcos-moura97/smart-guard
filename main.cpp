@@ -15,6 +15,30 @@
 #include "connectivity/wifi_wrapper.hpp" 
 #include "connectivity/mqtt_client.hpp"
 #endif
+
+int test_imu()
+{
+    stdio_init_all();
+    
+    auto i2c {std::make_shared<I2cDefault<Mpu6050::BAUD_RATE>>()};
+
+    Mpu6050 imu(i2c, 0x68, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0});
+    
+    while(true)
+    {
+        auto [accel, gyro, temp] = imu.measure();
+
+        auto [ax, ay, az] = accel;
+        auto [gx, gy, gz] = gyro;
+
+        std::printf("[%f, %f, %f], [%f, %f, %f], %f\n", ax, ay, az, gx, gy, gz, temp);
+
+        sleep_ms(1000);
+    }
+
+    return 0;
+}
+
 // ----------------- main -----------------
 int main()
 {

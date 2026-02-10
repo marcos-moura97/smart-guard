@@ -1,4 +1,5 @@
 #include "data.hpp"
+#include <cstdio>
 #include <device/imu/mpu6050.hpp>
 #include <pico/time.h>
 
@@ -13,16 +14,14 @@ Mpu6050::Mpu6050(std::shared_ptr<i2c_t> i2c, std::uint8_t addr, std::array<float
     _accel_offset(std::move(accel_offset)),
     _gyro_offset(std::move(gyro_offset))
 {
-    std::printf("Hello, MPU6050! Reading raw data from registers...\n");
     this->reset();
-    std::printf("Setup done! Starting reading.\n");
-    std::printf("ax_g,ay_g,az_g,pitch,roll,acc_smv,gyro_smv,mag_g,lying\n");
 }
 
 ImuDataRaw Mpu6050::measure_raw(void) const
 {
     if(!this->_i2c)
     {
+        std::printf("Warning: no I2C interface attached.\n");
         // Return all zeroes if no i2c interface exists
         return ImuDataRaw {
             .accel = {0, 0, 0},
@@ -30,6 +29,17 @@ ImuDataRaw Mpu6050::measure_raw(void) const
             .temp = 0
         };
     }
+    if(!this->is_connected())
+    {
+        std::printf("Warning: not connected!\n");
+        /*return ImuDataRaw {
+            .accel = {0, 0, 0},
+            .gyro = {0, 0 , 0},
+            .temp = 0
+        };*/
+    }
+
+    std::printf("Info: measuring...\n");
 
     ImuDataRaw data; // Initialize with garbage, it will be overwritten
 
@@ -132,6 +142,20 @@ void Mpu6050::reset() const
     static constexpr std::array<std::uint8_t, 2> RUN_INTERNAL_CLOCK {0x6B, 0x00};
     this->_i2c->write_blocking(this->_addr, RUN_INTERNAL_CLOCK, false);
     sleep_ms(10);
+}
+std::uint8_t Mpu6050::device_id(void) const
+{
+    static constexpr std::uint8_t WHOAMI {0x75};
+    std::uint8_t device_id;
+    this->_i2c->write_blocking(this->_addr, WHOAMI, true);
+    this->_i2c->read_blocking(this->_addr, device_id, false);
+    return device_id;
+}
+bool Mpu6050::is_connected(void) const
+{
+    static constexpr std::uint8_t DEFAULT_SLAVE_ADDRESS {0xD0};
+    std::uint8_t device_id {this->device_id()};
+    return device_id == DEFAULT_SLAVE_ADDRESS;
 }
 
 void Mpu6050::swap_msb_lsb(std::uint16_t& x)

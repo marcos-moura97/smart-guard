@@ -36,6 +36,17 @@ public:
     ImuData measure(void) const;
 
     ImuDataRaw measure_raw(void) const;
+
+    /**
+    * Returns a 6 bit number corresponding to the device id
+    */
+    std::uint8_t device_id(void) const;
+    /**
+    * Tests if connection has been successful
+    *
+    * NOTE: currently not working
+    */
+    bool is_connected(void) const;
     
 private:
     /// Acceleration from PCM to g

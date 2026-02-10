@@ -126,8 +126,7 @@ void FallDetector::analyze(const SensorData& sensor_data)
     }
 
     // 4) IMPACT detection
-    const bool is_lying_now {std::abs(ax_g) < IS_LYING_THRESHOLD && std::abs(az_g) > IS_LYING_THRESHOLD}; // rectangular (original)
-    //const bool is_lying_now {ax_g*ax_g + az_g*az_g > this->IS_LYING_THRESHOLD*this->IS_LYING_THRESHOLD}; // circular (not tested)
+    const bool is_lying_now {std::abs(ax_g) < IS_LYING_THRESHOLD && std::abs(az_g) > IS_LYING_THRESHOLD};
     if(this->events.impact.has_value())
     {
         this->events.impact->elapsed += this->delta_time.dt();
@@ -140,7 +139,7 @@ void FallDetector::analyze(const SensorData& sensor_data)
         this->events.tilt_change = {
             .elapsed {microseconds_t::zero()},
             .was_lying_at_impact = is_lying_now,
-            .is_tilt_change = false
+            .is_tilt_change = this->events.tilt_change.has_value() && this->events.tilt_change->is_tilt_change
         };
         std::printf("Event: IMPACT  mag=%.2f\n", mag_g);
     }
@@ -155,6 +154,10 @@ void FallDetector::analyze(const SensorData& sensor_data)
             {
                 this->events.tilt_change->is_tilt_change = true;
                 std::printf("Event: POSTURE CHANGE\n");
+            }
+            else
+            {
+                this->events.tilt_change = std::nullopt;
             }
         }
     }
@@ -192,6 +195,8 @@ std::optional<bool> FallDetector::evaluate(const PacketData& packet_data) const
             std::sqrt(ax_g*ax_g + ay_g*ay_g + az_g*az_g)
         };
         
+        // TODO: try this alternate one later:
+        //const bool is_lying_now = std::sqrt((packet_data.direction.roll - 90.0f)*(packet_data.direction.roll - 90.0f) + packet_data.direction.pitch*packet_data.direction.pitch) > 70.0f;
         const bool is_lying_now = std::abs(packet_data.direction.roll) < 20.0f
             || std::abs(packet_data.direction.roll) > 150.0f
             || std::abs(packet_data.direction.pitch) > 70.0f; // rectangular (original #2)
