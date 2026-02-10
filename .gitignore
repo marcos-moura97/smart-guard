@@ -2,10 +2,5 @@ build
 !.vscode/*
 .cache
 .archdeps/*.pkg.tar.zst
-<<<<<<< HEAD
-board.cmake
-misc/bootselBoot
-=======
 misc/bootselBoot
 cmake/config.cmake
->>>>>>> ac2b358 (Merge)
