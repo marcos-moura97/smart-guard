@@ -28,6 +28,7 @@ if (EXISTS ${picoVscode})
 endif()
 # ====================================================================================
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
 set(PICO_BOARD $ENV{PICO_BOARD} CACHE INTERNAL "") # here you type either pico2 (the board with you) or pico2_w (the one with me)
@@ -37,6 +38,8 @@ include(board.cmake)
 =======
 >>>>>>> 4ad5c57 (refactor: loading config variables from separate cmake file)
 >>>>>>> ac2b358 (Merge)
+=======
+>>>>>>> 6a5d99e (Merge)
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include("${CMAKE_SOURCE_DIR}/cmake/pico_sdk_import.cmake")
 # Enable warning flags
@@ -82,14 +85,11 @@ if(PICO_BOARD STREQUAL "pico2_w")
         PICO_BOARD_PICO2_W=1
         WIFI_SSID="${WIFI_SSID}"
         WIFI_PASSWORD="${WIFI_PASSWORD}"
-<<<<<<< HEAD
         MQTT_SERVER="${MQTT_SERVER}"
         MQTT_PORT_=${MQTT_PORT_}
         MQTT_TLS_PORT=${MQTT_TLS_PORT}
         MQTT_USERNAME="${MQTT_USERNAME}"
         MQTT_PASSWORD="${MQTT_PASSWORD}"
-=======
->>>>>>> ac2b358 (Merge)
     )
 endif()
 
