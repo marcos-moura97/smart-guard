@@ -7,6 +7,9 @@ set(CMAKE_CXX_STANDARD 20) # previously set to 17
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 set(CMAKE_CXX_EXTENSIONS ON)
 
+set(PICO_CYW43_ARCH_THREADSAFE_BACKGROUND 1)
+unset(PICO_PLATFORM CACHE)
+
 # Initialise pico_sdk from installed location
 # (note this can come from environment, CMake cache etc)
 
@@ -17,22 +20,29 @@ else()
     set(USERHOME $ENV{HOME})
 endif()
 set(sdkVersion 2.2.0)
-set(toolchainVersion 14_2_Rel1)
+set(toolchainVersion RISCV_ZCB_RPI_2_2_0_3)
 set(picotoolVersion 2.2.0-a4)
 set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
 if (EXISTS ${picoVscode})
     include(${picoVscode})
 endif()
 # ====================================================================================
-set(PICO_BOARD $ENV{PICO_BOARD} CACHE INTERNAL "") # here you type either pico2 (the board with you) or pico2_w (the one with me)
-include(board.cmake)
-                                                # You can make this cleaner, if you want :)
-
 # Pull in Raspberry Pi Pico SDK (must be before project)
-include(pico_sdk_import.cmake)
-
+include("${CMAKE_SOURCE_DIR}/cmake/pico_sdk_import.cmake")
 # Enable warning flags
-#include(warnings.cmake)
+#include("${CMAKE_SOURCE_DIR}/cmake/warnings.cmake")
+#
+if(EXISTS "${CMAKE_SOURCE_DIR}/cmake/config.cmake")
+    include("${CMAKE_SOURCE_DIR}/cmake/config.cmake")
+else()
+    message(WARNING 
+        "Missing config.cmake\n"
+        "Some variables can be missing. Create cmake/config.cmake from cmake/config.cmake.example"
+    )
+endif()
+if(NOT DEFINED PICO_BOARD)
+    set(PICO_BOARD pico2_w CACHE INTERNAL "")
+endif()
 
 project(smart_guard C CXX ASM)
 
@@ -58,9 +68,17 @@ add_executable(smart_guard
 )
 
 if(PICO_BOARD STREQUAL "pico2_w")
-    target_compile_definitions(smart_guard PRIVATE PICO_BOARD_PICO2_W=1)
+    target_compile_definitions(smart_guard PRIVATE 
+        PICO_BOARD_PICO2_W=1
+        WIFI_SSID="${WIFI_SSID}"
+        WIFI_PASSWORD="${WIFI_PASSWORD}"
+        MQTT_SERVER="${MQTT_SERVER}"
+        MQTT_PORT_=${MQTT_PORT_}
+        MQTT_TLS_PORT=${MQTT_TLS_PORT}
+        MQTT_USERNAME="${MQTT_USERNAME}"
+        MQTT_PASSWORD="${MQTT_PASSWORD}"
+    )
 endif()
-
 
 pico_set_program_name(smart_guard "smart_guard")
 pico_set_program_version(smart_guard "0.1")
@@ -78,9 +96,12 @@ target_link_libraries(smart_guard
     hardware_i2c
 )
 if(PICO_BOARD STREQUAL "pico2_w")
-    target_link_libraries(smart_guard
-        pico_cyw43_arch_none
-    )
+target_link_libraries(smart_guard
+    pico_cyw43_arch_lwip_threadsafe_background
+    pico_lwip_mqtt
+    pico_mbedtls
+    pico_lwip_mbedtls
+)
 endif()
 # Add the standard include files to the build
 target_include_directories(smart_guard PUBLIC
