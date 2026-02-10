@@ -7,6 +7,13 @@ set(WIFI_PASSWORD    "")
 
 # MQTT
 set(MQTT_SERVER      "")
+<<<<<<< HEAD
 set(MQTT_PORT_        0)
 set(MQTT_USERNAME    "")
 set(MQTT_PASSWORD    "")
+=======
+set(MQTT_PORT        0)
+set(MQTT_USERNAME    "")
+set(MQTT_PASSWORD    "")
+
+>>>>>>> ac2b358 (Merge)
