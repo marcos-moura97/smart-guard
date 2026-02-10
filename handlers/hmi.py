@@ -4,6 +4,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.animation as animation
 import numpy as np
 from datetime import datetime
+from typing import Union
 
 import threading
 import queue
@@ -11,11 +12,12 @@ import time
 
 from .serial_handler import SerialHandler
 from .data_handler import DataHandler
+from .mqtt_handler import MQTTHandler
 
 
 class GraphicalInterface:
-    def __init__(self, serial_handler: SerialHandler, data_handler: DataHandler):
-        self.serial_handler = serial_handler
+    def __init__(self, connection_handler: Union[SerialHandler, MQTTHandler], data_handler: DataHandler):
+        self.serial_handler = connection_handler
         self.data_handler = data_handler
 
         self.root = tk.Tk()
