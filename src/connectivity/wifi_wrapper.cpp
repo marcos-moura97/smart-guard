@@ -22,7 +22,7 @@ WifiWrapper::~WifiWrapper() {
 } 
 
 void WifiWrapper::enableSta() { 
-    cyw43_arch_enable_sta_mode(); 
+    cyw43_arch_enable_sta_mode();
 } 
 
 bool WifiWrapper::connect(const char* ssid, const char* pass, uint32_t timeout_ms) { 
