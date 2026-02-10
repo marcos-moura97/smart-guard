@@ -27,19 +27,6 @@ if (EXISTS ${picoVscode})
     include(${picoVscode})
 endif()
 # ====================================================================================
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-set(PICO_BOARD $ENV{PICO_BOARD} CACHE INTERNAL "") # here you type either pico2 (the board with you) or pico2_w (the one with me)
-include(board.cmake)
-                                                # You can make this cleaner, if you want :)
-
-=======
->>>>>>> 4ad5c57 (refactor: loading config variables from separate cmake file)
->>>>>>> ac2b358 (Merge)
-=======
->>>>>>> 6a5d99e (Merge)
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include("${CMAKE_SOURCE_DIR}/cmake/pico_sdk_import.cmake")
 # Enable warning flags
