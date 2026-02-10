@@ -36,5 +36,6 @@ bool WifiWrapper::connect(const char* ssid, const char* pass, uint32_t timeout_m
         std::printf("Wi-Fi: connected to network %s.\n", ssid); 
         return true;
     } 
+    return false;
 }
 #endif
