@@ -1,5 +1,15 @@
+#include <cmath>
 #include <cstdio>
 #include <data.hpp>
+
+std::array<float, 2> ImuData::accel_angles(void) const
+{
+    const auto [x, y, z] = this->accel;
+    return {
+        std::atan2(y, std::sqrt(x*x + z*z)),
+        std::atan2(-x, std::sqrt(y*y + z*z))
+    };
+}
 
 void PacketData::post(void) const
 {

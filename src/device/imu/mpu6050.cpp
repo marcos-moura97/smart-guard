@@ -1,20 +1,24 @@
 #include "data.hpp"
+#include <bit>
 #include <cstdio>
 #include <device/imu/mpu6050.hpp>
 #include <pico/time.h>
 
-Mpu6050::Mpu6050(i2c_t i2c, std::uint8_t addr, std::array<float, 3> accel_offset, std::array<float, 3> gyro_offset):
-    Mpu6050(std::make_shared<i2c_t>(std::move(i2c)), addr, std::move(accel_offset), std::move(gyro_offset))
+Mpu6050::Mpu6050(i2c_t i2c, std::uint8_t addr, AccelRange accel_range, GyroRange gyro_range):
+    Mpu6050(std::make_shared<i2c_t>(std::move(i2c)), addr, accel_range, gyro_range)
 {
     
 }
-Mpu6050::Mpu6050(std::shared_ptr<i2c_t> i2c, std::uint8_t addr, std::array<float, 3> accel_offset, std::array<float, 3> gyro_offset):
+Mpu6050::Mpu6050(std::shared_ptr<i2c_t> i2c, std::uint8_t addr, AccelRange accel_range, GyroRange gyro_range):
     _i2c(std::move(i2c)),
     _addr(addr),
-    _accel_offset(std::move(accel_offset)),
-    _gyro_offset(std::move(gyro_offset))
+    _accel_sensitivity(0.0),
+    _gyro_sensitivity(0.0)
 {
     this->reset();
+    this->set_accel_range(accel_range);
+    this->set_gyro_range(gyro_range);
+    this->set_accel_hpf(AccelHpf::Reset);
 }
 
 ImuDataRaw Mpu6050::measure_raw(void) const
@@ -47,7 +51,7 @@ ImuDataRaw Mpu6050::measure_raw(void) const
     static constexpr std::uint8_t REG_ACCEL {0x3B};
     this->_i2c->write_blocking(this->_addr, REG_ACCEL, true);
     this->_i2c->read_blocking(this->_addr, data.accel, false);
-    for(std::uint16_t& a : data.accel)
+    for(std::int16_t& a : data.accel)
     {
         this->swap_msb_lsb(a);
     }
@@ -56,7 +60,7 @@ ImuDataRaw Mpu6050::measure_raw(void) const
     static constexpr std::uint8_t REG_GYRO {0x43};
     this->_i2c->write_blocking(this->_addr, REG_GYRO, true);
     this->_i2c->read_blocking(this->_addr, data.gyro, false);
-    for(std::uint16_t& g : data.gyro)
+    for(std::int16_t& g : data.gyro)
     {
         this->swap_msb_lsb(g);
     }
@@ -88,21 +92,104 @@ ImuData Mpu6050::measure(void) const
     };
 }
 
-std::array<float, 3> Mpu6050::accel_from_raw(std::span<std::uint16_t, 3> accel_raw) const
+void Mpu6050::set_accel_range(AccelRange range)
 {
-    static constexpr float SENSORS_GRAVITY_EARTH = 9.80665F;
+    static constexpr std::uint8_t REG_ACCEL_CONFIG {0x1C};
 
+    std::uint8_t accel_config;
+    this->_i2c->write_blocking(this->_addr, REG_ACCEL_CONFIG, true);
+    this->_i2c->read_blocking(this->_addr, accel_config, false);
+
+    static constexpr std::uint8_t SHIFT {3};
+    static constexpr std::uint8_t MASK {0x3};
+    accel_config &= ~(MASK << SHIFT);
+    accel_config |= (static_cast<std::uint8_t>(range) & MASK) << SHIFT;
+
+    this->_i2c->write_blocking(this->_addr, std::array{REG_ACCEL_CONFIG, accel_config}, false);
+
+    this->_accel_sensitivity = this->accel_sensitivity(range);
+}
+void Mpu6050::set_accel_hpf(AccelHpf hpf)
+{
+    static constexpr std::uint8_t REG_ACCEL_CONFIG {0x1C};
+
+    std::uint8_t accel_config;
+    this->_i2c->write_blocking(this->_addr, REG_ACCEL_CONFIG, true);
+    this->_i2c->read_blocking(this->_addr, accel_config, false);
+
+    static constexpr std::uint8_t MASK {0x7};
+    accel_config &= ~MASK;
+    accel_config |= static_cast<std::uint8_t>(hpf) & MASK;
+
+    this->_i2c->write_blocking(this->_addr, std::array{REG_ACCEL_CONFIG, accel_config}, false);
+}
+void Mpu6050::set_gyro_range(GyroRange range)
+{
+    static constexpr std::uint8_t REG_GYRO_CONFIG {0x1B};
+
+    std::uint8_t gyro_config;
+    this->_i2c->write_blocking(this->_addr, REG_GYRO_CONFIG, true);
+    this->_i2c->read_blocking(this->_addr, gyro_config, false);
+
+    static constexpr std::uint8_t SHIFT {3};
+    static constexpr std::uint8_t MASK {0x3};
+    gyro_config &= ~(MASK << SHIFT);
+    gyro_config |= (static_cast<std::uint8_t>(range) & MASK) << SHIFT;
+
+    this->_i2c->write_blocking(this->_addr, std::array{REG_GYRO_CONFIG, gyro_config}, false);
+
+    this->_gyro_sensitivity = this->gyro_sensitivity(range);
+}
+
+Mpu6050::AccelRange Mpu6050::get_accel_range(void) const
+{
+    static constexpr std::uint8_t REG_ACCEL_CONFIG {0x1C};
+
+    std::uint8_t accel_config;
+    this->_i2c->write_blocking(this->_addr, REG_ACCEL_CONFIG, true);
+    this->_i2c->read_blocking(this->_addr, accel_config, false);
+
+    static constexpr std::uint8_t SHIFT {3};
+    static constexpr std::uint8_t MASK {0x3};
+    return static_cast<AccelRange>((accel_config >> SHIFT) & MASK);
+}
+Mpu6050::AccelHpf Mpu6050::get_accel_hpf(void) const
+{
+    static constexpr std::uint8_t REG_ACCEL_CONFIG {0x1C};
+
+    std::uint8_t accel_config;
+    this->_i2c->write_blocking(this->_addr, REG_ACCEL_CONFIG, true);
+    this->_i2c->read_blocking(this->_addr, accel_config, false);
+
+    static constexpr std::uint8_t MASK {0x7};
+    return static_cast<AccelHpf>(accel_config & MASK);
+}
+Mpu6050::GyroRange Mpu6050::get_gyro_range(void) const
+{
+    static constexpr std::uint8_t REG_GYRO_CONFIG {0x1B};
+
+    std::uint8_t gyro_config;
+    this->_i2c->write_blocking(this->_addr, REG_GYRO_CONFIG, true);
+    this->_i2c->read_blocking(this->_addr, gyro_config, false);
+
+    static constexpr std::uint8_t SHIFT {3};
+    static constexpr std::uint8_t MASK {0x3};
+    return static_cast<GyroRange>((gyro_config >> SHIFT) & MASK);
+}
+
+std::array<float, 3> Mpu6050::accel_from_raw(std::span<std::int16_t, 3> accel_raw) const
+{
     std::array<float, 3> accel;
     
     for(std::size_t i {0}; i < 3; ++i)
     {
-        accel[i] = static_cast<float>(accel_raw[i]) / 16384.0f - this->_accel_offset[i] / SENSORS_GRAVITY_EARTH;
+        accel[i] = static_cast<float>(accel_raw[i]) / this->_accel_sensitivity;
     }
     
     return accel;
 }
 
-std::array<float, 3> Mpu6050::gyro_from_raw(std::span<std::uint16_t, 3> gyro_raw) const
+std::array<float, 3> Mpu6050::gyro_from_raw(std::span<std::int16_t, 3> gyro_raw) const
 {
     // TODO: I assume this is the right constant. Maybe double check
     static constexpr float SENSORS_DPS_TO_RADS = 0.017453293F;
@@ -111,18 +198,15 @@ std::array<float, 3> Mpu6050::gyro_from_raw(std::span<std::uint16_t, 3> gyro_raw
     
     for(std::size_t i {0}; i < 3; ++i)
     {
-        gyro[i] = (static_cast<float>(gyro_raw[i]) - this->_gyro_offset[i]) * SENSORS_DPS_TO_RADS;
+        gyro[i] = static_cast<float>(gyro_raw[i]) * (RADS_PER_DEGREE / this->_gyro_sensitivity);
     }
     
     return gyro;
 }
 
-float Mpu6050::temp_from_raw(std::uint16_t temp_raw) const
+float Mpu6050::temp_from_raw(std::int16_t temp_raw) const
 {
-    // TODO: Temperature is not yet used. Set to a nonzero value when needed. Idk what this would be. Check datasheet maybe.
-    static constexpr float DEG_C_PER_DPS = 0.0;
-
-    return static_cast<float>(temp_raw) * DEG_C_PER_DPS;
+    return static_cast<float>(temp_raw) / TEMP_SENSITIVITY + TEMP_OFFSET;
 }
 
 void Mpu6050::reset() const
@@ -153,14 +237,25 @@ std::uint8_t Mpu6050::device_id(void) const
 }
 bool Mpu6050::is_connected(void) const
 {
-    static constexpr std::uint8_t DEFAULT_SLAVE_ADDRESS {0xD0};
     std::uint8_t device_id {this->device_id()};
     return device_id == DEFAULT_SLAVE_ADDRESS;
 }
 
-void Mpu6050::swap_msb_lsb(std::uint16_t& x)
+void Mpu6050::swap_msb_lsb(std::int16_t& x)
 {
-    std::uint8_t* msb {reinterpret_cast<std::uint8_t*>(&x)};
-    std::uint8_t* lsb {msb + 1};
-    std::swap(*msb, *lsb);
+    if(std::endian::native == std::endian::little)
+    {
+        std::uint8_t* msb {reinterpret_cast<std::uint8_t*>(&x)};
+        std::uint8_t* lsb {msb + 1};
+        std::swap(*msb, *lsb);
+    }
+}
+
+float Mpu6050::accel_sensitivity(AccelRange range)
+{
+    return ACCEL_SENSITIVITY[static_cast<std::uint8_t>(range)];
+}
+float Mpu6050::gyro_sensitivity(GyroRange range)
+{
+    return GYRO_SENSITIVITY[static_cast<std::uint8_t>(range)];
 }

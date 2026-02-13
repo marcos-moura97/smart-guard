@@ -2,11 +2,13 @@
 #include <array>
 #include <cstdint>
 
+struct ImuData;
+
 struct ImuDataRaw final
 {
-    std::array<std::uint16_t, 3> accel;
-    std::array<std::uint16_t, 3> gyro;
-    std::uint16_t temp;
+    std::array<std::int16_t, 3> accel;
+    std::array<std::int16_t, 3> gyro;
+    std::int16_t temp;
 };
 
 struct ImuData final
@@ -14,6 +16,8 @@ struct ImuData final
     std::array<float, 3> accel;
     std::array<float, 3> gyro;
     float temp;
+
+    std::array<float, 2> accel_angles(void) const;
 };
 
 struct Direction final

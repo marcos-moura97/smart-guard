@@ -17,13 +17,43 @@
 #include "connectivity/mqtt_client.hpp"
 #endif
 
+// ----------------- main -----------------
+int main()
+{
+    stdio_init_all();
+
+    auto i2c {std::make_shared<I2cDefault<Mpu6050::BAUD_RATE>>()};
+    
+    Mpu6050 imu(i2c, Mpu6050::DEFAULT_SLAVE_ADDRESS, Mpu6050::AccelRange::G2, Mpu6050::GyroRange::D250);
+
+    Timer blink(
+        Blink(),
+        std::chrono::seconds(1) // 1 Hz
+    );
+
+    Timer fall_detector(
+        FallDetector(GpioButton(), GpioEmergencyLed(), std::move(imu)), 
+        std::chrono::milliseconds(20) // 50 Hz
+    );
+
+    while(blink.status() == Timer::Status::running || fall_detector.status() == Timer::Status::running)
+    {
+        std::printf("Test");
+        sleep_ms(1000);
+    }
+
+    std::printf("Done");
+    
+    return 0; 
+}
+
 int test_imu()
 {
     stdio_init_all();
     
     auto i2c {std::make_shared<I2cDefault<Mpu6050::BAUD_RATE>>()};
 
-    Mpu6050 imu(i2c, 0x68, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0});
+    Mpu6050 imu(i2c, Mpu6050::DEFAULT_SLAVE_ADDRESS, Mpu6050::AccelRange::G2, Mpu6050::GyroRange::D250);
     
     while(true)
     {
@@ -40,13 +70,11 @@ int test_imu()
     return 0;
 }
 
-// ----------------- main -----------------
-int main()
+#ifdef PICO_BOARD_PICO2_W
+int test_wifi()
 {
-
     stdio_init_all();
 
-#ifdef PICO_BOARD_PICO2_W    
     WifiWrapper wifi;
     if (!wifi.init()) {
         return 1;
@@ -69,39 +97,13 @@ int main()
         std::printf("Timeout waiting for MQTT connect\n");
     }
 
-#endif
-
-    auto i2c {std::make_shared<I2cDefault<Mpu6050::BAUD_RATE>>()};
-    
-    // IMU error correction shouldn't be hard-coded
-    // Unless we create a 'calibration mode', it has to be like this
-    // This is a could have, not a must have, by the end of the semester we can think about it
-    Mpu6050 imu(i2c, 0x68, {-0.3f, -0.2f, -0.9f}, {-3.5f, 0.0f, -1.5f});
-
-    Timer blink(
-        Blink(),
-        std::chrono::seconds(1) // 1 Hz
-    );
-
-    Timer fall_detector(
-        FallDetector(GpioButton(), GpioEmergencyLed(), std::move(imu)), 
-        std::chrono::milliseconds(20) // 50 Hz
-    );
-    
-#ifdef PICO_BOARD_PICO2_W
     Timer ping(
         Ping([&mqtt]() { mqtt.publish_ping(); }),
         std::chrono::seconds(1)
     );
-#endif
 
-    fall_detector.join();
-    blink.join();
-#ifdef PICO_BOARD_PICO2_W
     ping.join();
-#endif
 
-    std::printf("Done");
-    
-    return 0; 
+    return 0;
 }
+#endif
