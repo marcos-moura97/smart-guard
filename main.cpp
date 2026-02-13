@@ -22,27 +22,24 @@ int main()
 {
     stdio_init_all();
 
-    auto i2c {std::make_shared<I2cDefault<Mpu6050::BAUD_RATE>>()};
+    //auto i2c {std::make_shared<I2cDefault<Mpu6050::BAUD_RATE>>()};
     
-    Mpu6050 imu(i2c, Mpu6050::DEFAULT_SLAVE_ADDRESS, Mpu6050::AccelRange::G2, Mpu6050::GyroRange::D250);
+    //Mpu6050 imu(i2c, Mpu6050::DEFAULT_SLAVE_ADDRESS, Mpu6050::AccelRange::G2, Mpu6050::GyroRange::D250);
 
     Timer blink(
         Blink(),
         std::chrono::seconds(1) // 1 Hz
     );
 
-    Timer fall_detector(
+    /*Timer fall_detector(
         FallDetector(GpioButton(), GpioEmergencyLed(), std::move(imu)), 
         std::chrono::milliseconds(20) // 50 Hz
-    );
+    );*/
 
-    while(blink.status() == Timer::Status::running || fall_detector.status() == Timer::Status::running)
+    while(blink.status() == Timer::Status::running /*|| fall_detector.status() == Timer::Status::running*/)
     {
-        std::printf("Test");
         sleep_ms(1000);
     }
-
-    std::printf("Done");
     
     return 0; 
 }
@@ -102,7 +99,10 @@ int test_wifi()
         std::chrono::seconds(1)
     );
 
-    ping.join();
+    while(ping.status() == Timer::Status::running)
+    {
+        sleep_ms(1000);
+    }
 
     return 0;
 }

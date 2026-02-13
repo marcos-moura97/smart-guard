@@ -51,11 +51,6 @@ public:
 
     microseconds_t delay(void) const;
     Status status(void) const;
-
-    /**
-    * Waits for process to finish before continuing
-    */
-    void join(void) const;
 };
 
 #include <device/timer.tpp>
