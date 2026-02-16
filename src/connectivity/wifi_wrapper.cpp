@@ -7,11 +7,7 @@ WifiWrapper::WifiWrapper(): initialized_(false),attempts_(10) {}
 bool WifiWrapper::init() { 
     if (initialized_) 
         return true; 
-    if (cyw43_arch_init()) { 
-        std::printf("CYW43: failed to initialise\n"); 
-        return false; 
-    } 
-    
+            
     initialized_ = true; 
     return true; 
 }

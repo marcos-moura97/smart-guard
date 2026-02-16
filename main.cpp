@@ -21,6 +21,12 @@
 int main()
 {
     stdio_init_all();
+    // it's ugly, I know, fell free to refactor as you want
+    if (cyw43_arch_init()) { 
+        std::printf("CYW43: failed to initialise\n"); 
+        return false; 
+    } 
+    WifiWrapper wifi;
 
     //auto i2c {std::make_shared<I2cDefault<Mpu6050::BAUD_RATE>>()};
     
@@ -71,7 +77,11 @@ int test_imu()
 int test_wifi()
 {
     stdio_init_all();
-
+    
+    if (cyw43_arch_init()) { 
+        std::printf("CYW43: failed to initialise\n"); 
+        return false; 
+    } 
     WifiWrapper wifi;
     if (!wifi.init()) {
         return 1;
