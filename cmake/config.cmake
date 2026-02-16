@@ -2,11 +2,11 @@
 set(PICO_BOARD pico2_w CACHE INTERNAL "")
 
 # WiFi
-set(WIFI_SSID        "eb33")
-set(WIFI_PASSWORD    "nietsoJ1803")
+set(WIFI_SSID        "Autonomous")
+set(WIFI_PASSWORD    "AutoSaiL1")
 
 # MQTT
-set(MQTT_SERVER      "dunno")
-set(MQTT_PORT_        0)
-set(MQTT_USERNAME    "")
-set(MQTT_PASSWORD    "")
+set(MQTT_SERVER      "192.168.1.14")
+set(MQTT_PORT_        1883)
+set(MQTT_USERNAME    "SmartGuard")
+set(MQTT_PASSWORD    "smartguard123")
