@@ -3,8 +3,12 @@
 // Compatible with Raspberry Pi Pico W (CYW43) + lwIP MQTT
 
 #include <cstring>
+#include <string>
 #include <cstdio>
 #include <cmath>
+
+#include <data.hpp>
+#include <serializer.hpp>
 
 #include "pico/unique_id.h"
 #include "pico/cyw43_arch.h"
@@ -25,14 +29,11 @@
 #ifdef MQTT_CERT_INC
 #include MQTT_CERT_INC
 #endif
-
 #ifndef MQTT_TOPIC_LEN
 #define MQTT_TOPIC_LEN 100
 #endif
 
-#ifndef MQTT_OUTPUT_RINGBUF_SIZE
-#define MQTT_OUTPUT_RINGBUF_SIZE 1024
-#endif
+#define MQTT_OUTPUT_RINGBUF_SIZE 300
 
 #ifndef MQTT_KEEP_ALIVE_S
 #define MQTT_KEEP_ALIVE_S 60
@@ -63,7 +64,7 @@
 
 // Our data topic base
 #define MQTT_BASE_TOPIC "/smartguard"
-#define MQTT_DATA_TOPIC MQTT_BASE_TOPIC "/data"
+#define MQTT_DATA_TOPIC "/data"
 
 class MqttClient {
 public:
@@ -78,7 +79,7 @@ public:
                  u8_t qos = MQTT_PUBLISH_QOS,
                  u8_t retain = MQTT_PUBLISH_RETAIN,
                  bool treat_as_basic_topic = true);
-    bool publishPayload(const char* payload);
+    bool publishPayload(const PacketData& packet);
     void publish_ping();
     bool subscribe(const char* name, u8_t qos = MQTT_SUBSCRIBE_QOS);
     bool waitUntilConnected(uint32_t timeout_ms) const;

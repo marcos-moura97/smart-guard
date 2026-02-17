@@ -18,14 +18,12 @@ MqttClient::MqttClient()
                     bid.id[0], bid.id[1], bid.id[2], bid.id[3],
                     bid.id[4], bid.id[5], bid.id[6], bid.id[7]);
 
-    // Configure default connect info (user/pass optional via defines or left NULL)
     info_.client_id     = client_id_;
     info_.keep_alive    = MQTT_KEEP_ALIVE_S;
-    info_.client_user   = nullptr; // set if you use authentication
+    info_.client_user   = nullptr; 
     info_.client_pass   = nullptr;
 
-    // LWT (offline), we will publish "1" to the same topic after connection (online)
-    // Ensure the will topic storage outlives the connect call
+    
     build_full_topic(MQTT_WILL_TOPIC, will_topic_, sizeof(will_topic_));
     info_.will_topic    = will_topic_;
     info_.will_msg      = MQTT_WILL_MSG;
@@ -110,9 +108,25 @@ bool MqttClient::publish(const char* name_or_full_topic,
     return true;
 }
 
-bool MqttClient::publishPayload(const char* payload) {
-    return publish(MQTT_DATA_TOPIC, payload, MQTT_PUBLISH_QOS, MQTT_PUBLISH_RETAIN, /*treat_as_basic_topic=*/true);
+bool MqttClient::publishPayload(const PacketData& packet)
+{
+    std::string json;
+
+    if (!Serializer::toJson(packet, json))
+    {
+        std::printf("JSON serialization failed\n");
+        return false;
+    }
+
+    return publish(
+        MQTT_DATA_TOPIC,
+        json.c_str(),
+        0,
+        MQTT_PUBLISH_RETAIN,
+        true
+    );
 }
+
 
 bool MqttClient::subscribe(const char* name, u8_t qos) {
     cyw43_arch_lwip_begin();
