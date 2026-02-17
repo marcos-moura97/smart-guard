@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
 #include <cstdint>
-#include <ostream>
+#include <string>
 
 struct ImuData;
 
