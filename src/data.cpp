@@ -1,5 +1,5 @@
+#include "connectivity/client/usart.hpp"
 #include <cmath>
-#include <cstdio>
 #include <data.hpp>
 #include <format>
 
@@ -32,4 +32,9 @@ std::string PacketData::format_csv(void) const
         this->in_post_fall_monitor,
         this->fall_detected
     );
+}
+
+void PacketData::post(void) const
+{
+    Usart().send(*this);
 }

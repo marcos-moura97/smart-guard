@@ -32,7 +32,7 @@ struct SensorData final
     ImuData imu;
 };
 
-struct Ping
+struct PingData final
 {
     
 };
@@ -55,4 +55,7 @@ struct PacketData final
         // TODO: Add JSON formatting here later
         return "{\"error\": \"Placeholder... JSON implementation missing\"}";
     }
+
+    [[deprecated]]
+    void post(void) const;
 };
