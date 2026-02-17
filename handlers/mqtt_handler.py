@@ -12,16 +12,19 @@ class MQTTHandler:
         self.topic = topic
         self.connected = False
 
-        self.queue = queue.Queue(maxsize=500)
+        self.last_line = None
+        
         try:
             self.client = mqtt.Client()
             self.client.on_connect = self.on_connect
             self.client.on_message = self.on_message
-
             self.client.connect(broker, port, keepalive=60)
             self.client.loop_start()
         except ConnectionRefusedError as e:
             print(f"Error: {e.strerror}")
+
+    def read_line(self):
+        return self.last_line
 
 
     def on_connect(self, client, userdata, flags, rc):
@@ -38,24 +41,38 @@ class MQTTHandler:
             payload = msg.payload.decode("utf-8")
             data = json.loads(payload)
 
+            ax, ay, az = data["imu"]["accel"]
+
+            pitch = data["dir"]["pitch"]
+            roll = data["dir"]["roll"]
+
+            pitch_f = data["dir_filtered"]["pitch"]
+            roll_f = data["dir_filtered"]["roll"]
+
+            free_fall = int(data["events"]["free_fall"])
+            impact = int(data["events"]["impact"])
+            tilt_change = int(data["events"]["tilt_change"])
+            post_fall = int(data["events"]["post_fall_monitor"])
+            fall_detected = int(data["events"]["fall_detected"])
+
             line = (
-                f"{data['ax']:.3f},"
-                f"{data['ay']:.3f},"
-                f"{data['az']:.3f},"
-                f"{data['pitch']:.3f},"
-                f"{data['roll']:.3f},"
-                f"{data['pitch_f']:.3f},"
-                f"{data['roll_f']:.3f},"
-                f"{int(data['freeFall'])},"
-                f"{int(data['impact'])},"
-                f"{int(data['tilt'])},"
-                f"{int(data['postFall'])},"
-                f"{int(data['detected'])}"
+                f"{ax:.3f},"
+                f"{ay:.3f},"
+                f"{az:.3f},"
+                f"{pitch:.3f},"
+                f"{roll:.3f},"
+                f"{pitch_f:.3f},"
+                f"{roll_f:.3f},"
+                f"{free_fall},"
+                f"{impact},"
+                f"{tilt_change},"
+                f"{post_fall},"
+                f"{fall_detected}"
             )
+            
+            self.last_line = line
 
-            self.queue.put_nowait(line)
-
-        except (json.JSONDecodeError, KeyError, queue.Full):
+        except (json.JSONDecodeError, KeyError, IndexError, queue.Full):
             pass
 
     def read_line(self) -> str:

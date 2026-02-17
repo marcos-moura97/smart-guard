@@ -17,7 +17,7 @@ from .mqtt_handler import MQTTHandler
 
 class GraphicalInterface:
     def __init__(self, connection_handler: Union[SerialHandler, MQTTHandler], data_handler: DataHandler):
-        self.serial_handler = connection_handler
+        self.connection_handler = connection_handler
         self.data_handler = data_handler
 
         self.root = tk.Tk()
@@ -103,17 +103,18 @@ class GraphicalInterface:
     def serial_reader_thread(self):
         """Reads serial at high speed without blocking the UI."""
         while True:
-            line = self.serial_handler.read_line()
-
+            line = self.connection_handler.read_line()
+            
             if line:
-                try:
-                    self.data_queue.put(line, timeout=0.01)
-                except queue.Full:
-                    # Drop oldest entries if queue fills
+                if len(line) > 0:
                     try:
-                        self.data_queue.get_nowait()
-                    except:
-                        pass
+                        self.data_queue.put(line, timeout=0.01)
+                    except queue.Full:
+                        # Drop oldest entries if queue fills
+                        try:
+                            self.data_queue.get_nowait()
+                        except:
+                            pass
 
             # Small sleep prevents 100% CPU
             time.sleep(0.001)
