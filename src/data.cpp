@@ -1,6 +1,7 @@
 #include <cmath>
 #include <cstdio>
 #include <data.hpp>
+#include <format>
 
 std::array<float, 2> ImuData::accel_angles(void) const
 {
@@ -11,12 +12,13 @@ std::array<float, 2> ImuData::accel_angles(void) const
     };
 }
 
-void PacketData::post(void) const
+std::string PacketData::format_csv(void) const
 {
     const auto& [ax_g, ay_g, az_g] {this->sensor_data.imu.accel};
 
     // print similar CSV as original
-    std::printf("%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%d,%d,%d,%d\n",
+    return std::format(
+        "{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:d},{:d},{:d},{:d},{:d}",
         ax_g,
         ay_g,
         az_g,

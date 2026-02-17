@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <cstdint>
+#include <ostream>
 
 struct ImuData;
 
@@ -31,6 +32,11 @@ struct SensorData final
     ImuData imu;
 };
 
+struct Ping
+{
+    
+};
+
 // The data to be sent to the client or host system
 struct PacketData final
 {
@@ -43,5 +49,10 @@ struct PacketData final
     bool in_post_fall_monitor;
     bool fall_detected;
 
-    void post(void) const;
+    std::string format_csv(void) const;
+    std::string format_json(void) const
+    {
+        // TODO: Add JSON formatting here later
+        return "{\"error\": \"Placeholder... JSON implementation missing\"}";
+    }
 };
