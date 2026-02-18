@@ -1,6 +1,7 @@
+#include "connectivity/client/usart.hpp"
 #include <cmath>
-#include <cstdio>
 #include <data.hpp>
+#include <format>
 
 std::array<float, 2> ImuData::accel_angles(void) const
 {
@@ -11,12 +12,13 @@ std::array<float, 2> ImuData::accel_angles(void) const
     };
 }
 
-void PacketData::post(void) const
+std::string PacketData::format_csv(void) const
 {
     const auto& [ax_g, ay_g, az_g] {this->sensor_data.imu.accel};
 
     // print similar CSV as original
-    std::printf("%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%d,%d,%d,%d\n",
+    return std::format(
+        "{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:d},{:d},{:d},{:d},{:d}",
         ax_g,
         ay_g,
         az_g,
@@ -30,4 +32,10 @@ void PacketData::post(void) const
         this->in_post_fall_monitor,
         this->fall_detected
     );
+}
+
+void PacketData::post(void) const
+{
+    // This function only exists for backwards compatability and should be removed. Please remove it when it's no longer used.
+    Usart().send(*this); // WARNING: as of writing, Usart is a stateless type, so this is fine... Later it might not be and this needs to be removed.
 }
