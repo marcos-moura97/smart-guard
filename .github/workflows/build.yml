@@ -1,8 +1,8 @@
 # not sure if this will work, so we're not enabling automated runs yet
 name: Build
-#on:
-#  schedule:
-#    - cron: '29 15 * * *'
+on:
+  schedule:
+    - cron: '29 15 * * *'
 #  push:
 #    branches: [ "master" ]
 #  pull_request:
