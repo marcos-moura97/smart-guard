@@ -7,7 +7,7 @@ name: Build
 #    branches: [ "master" ]
 #  pull_request:
 #    branches: [ "master" ]
-env:
+#env:
   #RUST_BACKTRACE: 1
   #RUST_LOG: "cargo_tarpaulin=trace,llvm_profparser=trace"
 jobs:
@@ -28,4 +28,4 @@ jobs:
     - name: Install toolchain
       run: make linux && cd ..
     - name: Build project
-      uses: cmake --build ./build --config Debug --target all --
+      run: cmake --build ./build --config Debug --target all --
