@@ -26,6 +26,6 @@ jobs:
     - name: Configure toolchain
       run: cd riscv-gnu-toolchain && ./configure --prefix=/opt/riscv --with-arch=rv32gc --with-abi=ilp32d
     - name: Install toolchain
-      run: make linux && cd ..
+      run: cd riscv-gnu-toolchain && make linux
     - name: Build project
       run: cmake --build ./build --config Debug --target all --
