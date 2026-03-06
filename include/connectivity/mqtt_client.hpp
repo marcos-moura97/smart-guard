@@ -9,7 +9,6 @@
 #include <algorithm>
 
 #include <data.hpp>
-#include <serializer.hpp>
 
 #include "pico/unique_id.h"
 #include "pico/cyw43_arch.h"
