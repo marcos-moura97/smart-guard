@@ -6,13 +6,11 @@
 #include <cstdio> 
 #include <cstring> 
 
-extern "C" { 
-    #include "pico/stdlib.h" 
-    #include "pico/cyw43_arch.h" 
-    #include "lwip/pbuf.h" 
-    #include "lwip/udp.h" 
-    #include "lwip/ip_addr.h" 
-} 
+#include "pico/stdlib.h" 
+#include "pico/cyw43_arch.h" 
+#include "lwip/pbuf.h" 
+#include "lwip/udp.h" 
+#include "lwip/ip_addr.h" 
 
 class WifiWrapper { 
 public: 

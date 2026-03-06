@@ -50,11 +50,7 @@ struct PacketData final
     bool fall_detected;
 
     std::string format_csv(void) const;
-    std::string format_json(void) const
-    {
-        // TODO: Add JSON formatting here later
-        return "{\"error\": \"Placeholder... JSON implementation missing\"}";
-    }
+    std::string format_json(void) const;
 
     /**
     * @deprecated This function only exists for backwards compatability and should be removed. Please remove it when it's no longer used.

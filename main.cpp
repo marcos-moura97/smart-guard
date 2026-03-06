@@ -116,4 +116,62 @@ int test_wifi()
 
     return 0;
 }
+
+int test_wifi_w_imu(){
+    stdio_init_all();
+    if (cyw43_arch_init()) { 
+        std::printf("CYW43: failed to initialise\n"); 
+        return false; 
+    } 
+    
+    auto i2c {std::make_shared<I2cDefault<Mpu6050::BAUD_RATE>>()};
+
+    Mpu6050 imu(i2c, Mpu6050::DEFAULT_SLAVE_ADDRESS, Mpu6050::AccelRange::G2, Mpu6050::GyroRange::D250);
+
+    WifiWrapper wifi;
+    if (!wifi.init()) {
+        return 1;
+    }
+    wifi.enableSta();
+    if (!wifi.connect(WIFI_SSID, WIFI_PASSWORD, 30000)) {
+        return 1;
+    }
+    sleep_ms(2000);
+
+    MqttClient mqtt;
+    mqtt.setAuth(MQTT_USERNAME, MQTT_PASSWORD);
+    if (!mqtt.resolveAndConnect(MQTT_SERVER)) {
+        std::printf("DNS/Connect sequence failed to start\n");
+    }
+    if (!mqtt.waitUntilConnected(10000)) {
+        std::printf("Timeout waiting for MQTT connect\n");
+    }
+    
+    while(true)
+    {
+        SensorData sensor_data = {};
+        sensor_data.imu = {imu.measure()};
+        Direction direction = {};
+
+        //std::printf("[%f, %f, %f], [%f, %f, %f], %f\n", ax, ay, az, gx, gy, gz, temp);
+
+        
+        mqtt.publishPayload(PacketData {
+            .sensor_data {sensor_data},
+            .direction {direction},
+            .direction_filtered {direction},
+            
+            .free_fall_event = false,
+            .impact_event = false,
+            .tilt_change_event = false,
+            .in_post_fall_monitor = false,
+            .fall_detected = false
+        });
+
+        sleep_ms(100);
+    }
+
+    return 0;
+}
+
 #endif
