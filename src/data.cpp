@@ -80,9 +80,3 @@ std::string PacketData::format_json() const
 
     return std::string(buffer.data());
 }
-
-void PacketData::post(void) const
-{
-    // This function only exists for backwards compatability and should be removed. Please remove it when it's no longer used.
-    Usart().send(*this); // WARNING: as of writing, Usart is a stateless type, so this is fine... Later it might not be and this needs to be removed.
-}

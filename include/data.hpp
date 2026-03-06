@@ -51,10 +51,4 @@ struct PacketData final
 
     std::string format_csv(void) const;
     std::string format_json(void) const;
-
-    /**
-    * @deprecated This function only exists for backwards compatability and should be removed. Please remove it when it's no longer used.
-    */
-    [[deprecated]]
-    void post(void) const;
 };

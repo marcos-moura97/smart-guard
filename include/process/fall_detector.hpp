@@ -1,4 +1,5 @@
 #pragma once
+#include "connectivity/send.hpp"
 #include "device/gpio.hpp"
 #include "device/imu/mpu6050.hpp"
 #include <cstdint>
@@ -68,33 +69,34 @@ private:
         bool is_monitoring_post_fall(void) const;
     };
 
-    GpioButton button;
-    GpioEmergencyLed emergency_led;
-    Mpu6050 imu;
-    DeltaTime delta_time;
+    GpioButton _button;
+    GpioEmergencyLed _emergency_led;
+    Mpu6050 _imu;
+    std::shared_ptr<Send<PacketData>> _client;
+    DeltaTime _delta_time;
 
     // Events
-    Events events {};
+    Events _events {};
 
     // Data envelope
-    float post_min_mag {0.0};
-    float post_max_mag {0.0};
+    float _post_min_mag {0.0};
+    float _post_max_mag {0.0};
 
     // Warning status
-    bool fall_detected {false};
+    bool _fall_detected {false};
 
     // Filtering
-    std::array<FirFilter<1>, 3> filter_accel {FILTER_COEFFS, FILTER_COEFFS, FILTER_COEFFS};
-    std::array<FirFilter<1>, 3> filter_gyro {FILTER_COEFFS, FILTER_COEFFS, FILTER_COEFFS};
-    Kalman kalman_pitch {};
-    Kalman kalman_roll {};
-    bool is_kalman_calibrated {false};
+    std::array<FirFilter<1>, 3> _filter_accel {FILTER_COEFFS, FILTER_COEFFS, FILTER_COEFFS};
+    std::array<FirFilter<1>, 3> _filter_gyro {FILTER_COEFFS, FILTER_COEFFS, FILTER_COEFFS};
+    Kalman _kalman_pitch {};
+    Kalman _kalman_roll {};
+    bool _is_kalman_calibrated {false};
 
 public:
     //FallDetector(void) = delete;
     //FallDetector(const FallDetector&) = delete;
 
-    FallDetector(GpioButton button, GpioEmergencyLed emergency_led, Mpu6050 imu);
+    FallDetector(GpioButton button, GpioEmergencyLed emergency_led, Mpu6050 imu, std::shared_ptr<Send<PacketData>> client);
 
 protected:
     // The core algorithm for fall detection
