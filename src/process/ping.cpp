@@ -2,21 +2,17 @@
 #include <hardware/gpio.h>
 #include <process/ping.hpp>
 
-#ifdef PICO_BOARD_PICO2_W
-#include "pico/cyw43_arch.h"
-#endif
-
-Ping::Ping(std::function<void()> onUpdate)
-    : _onUpdate(onUpdate)
+Ping::Ping(std::function<void()> on_update): 
+    _on_update(on_update)
 {
-    printf("Ping process started!");
+    std::printf("Ping process started!");
 }
 
 Process::Update Ping::update(void)
 {
-
-    if (_onUpdate)
-        _onUpdate();
-
+    if(this->_on_update)
+    {
+        this->_on_update();
+    }
     return Update::pending;
 }

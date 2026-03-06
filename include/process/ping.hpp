@@ -13,9 +13,9 @@
 class Ping : public Process
 {
 private:    
-    std::function<void()> _onUpdate;
+    std::function<void()> _on_update;
 public:
-    Ping(std::function<void()> onUpdate = nullptr);
+    Ping(std::function<void()> on_update = nullptr);
 
 protected:
     virtual Update update(void) override;

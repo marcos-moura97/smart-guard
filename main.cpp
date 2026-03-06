@@ -1,3 +1,4 @@
+#include "data.hpp"
 #include "device/gpio.hpp"
 #include "device/i2c.hpp"
 #include "process/fall_detector.hpp"
@@ -24,7 +25,7 @@ int main()
     // it's ugly, I know, fell free to refactor as you want
     if (cyw43_arch_init()) { 
         std::printf("CYW43: failed to initialise\n"); 
-        return false; 
+        return 1; 
     } 
     WifiWrapper wifi;
 
@@ -105,7 +106,7 @@ int test_wifi()
     }
 
     Timer ping(
-        Ping([&mqtt]() { mqtt.publish_ping(); }),
+        Ping([&mqtt]() { mqtt.send(PingData()); }),
         std::chrono::seconds(1)
     );
 
@@ -156,17 +157,19 @@ int test_wifi_w_imu(){
         //std::printf("[%f, %f, %f], [%f, %f, %f], %f\n", ax, ay, az, gx, gy, gz, temp);
 
         
-        mqtt.publishPayload(PacketData {
-            .sensor_data {sensor_data},
-            .direction {direction},
-            .direction_filtered {direction},
-            
-            .free_fall_event = false,
-            .impact_event = false,
-            .tilt_change_event = false,
-            .in_post_fall_monitor = false,
-            .fall_detected = false
-        });
+        mqtt.send(
+            PacketData {
+                .sensor_data {sensor_data},
+                .direction {direction},
+                .direction_filtered {direction},
+                
+                .free_fall_event = false,
+                .impact_event = false,
+                .tilt_change_event = false,
+                .in_post_fall_monitor = false,
+                .fall_detected = false
+            }
+        );
 
         sleep_ms(100);
     }

@@ -1,4 +1,3 @@
-#include "connectivity/client/usart.hpp"
 #include <cmath>
 #include <data.hpp>
 #include <format>

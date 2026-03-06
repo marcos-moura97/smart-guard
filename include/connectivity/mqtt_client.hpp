@@ -2,21 +2,12 @@
 // Refactored into OOP by encapsulating lwIP MQTT client and callbacks
 // Compatible with Raspberry Pi Pico W (CYW43) + lwIP MQTT
 
-#include <cstring>
-#include <string>
-#include <cstdio>
-#include <cmath>
-#include <algorithm>
-
+#include "connectivity/send.hpp"
 #include <data.hpp>
 
-#include "pico/unique_id.h"
-#include "pico/cyw43_arch.h"
+#define MQTT_OUTPUT_RINGBUF_SIZE 300
 
 #include "lwip/apps/mqtt.h"
-#include "lwip/apps/mqtt_priv.h"   
-#include "lwip/dns.h"
-#include "lwip/altcp_tls.h"
 
 #if LWIP_ALTCP && LWIP_ALTCP_TLS
 #include "mbedtls/ssl.h"
@@ -32,8 +23,6 @@
 #ifndef MQTT_TOPIC_LEN
 #define MQTT_TOPIC_LEN 100
 #endif
-
-#define MQTT_OUTPUT_RINGBUF_SIZE 300
 
 #ifndef MQTT_KEEP_ALIVE_S
 #define MQTT_KEEP_ALIVE_S 60
@@ -66,9 +55,22 @@
 #define MQTT_BASE_TOPIC "/smartguard"
 #define MQTT_DATA_TOPIC "/data"
 
-class MqttClient {
+class MqttClient final : Send<PingData>, Send<PacketData>
+{
+private:
+    mqtt_client_t* _client;
+    mqtt_connect_client_info_t _info;
+    ip_addr_t _server_addr;
+    bool _connect_done;
+    bool _stop_client;
+
+    std::array<char, 64> _client_id;
+    std::array<char, MQTT_TOPIC_LEN> _will_topic;
+    std::array<char, MQTT_TOPIC_LEN> _topic;
+    std::array<char, MQTT_OUTPUT_RINGBUF_SIZE> _data;
+
 public:
-    MqttClient();
+    MqttClient(void);
     ~MqttClient();
 
     // Set the authorization information used for the client to connect with the broker
@@ -87,14 +89,25 @@ public:
                  u8_t retain,
                  bool treat_as_basic_topic);
 
-    // converts the packet to json (please check if I did it correctly)
-    // then publishes it
-    bool publishPayload(const PacketData& packet);
-    // simple ping, just publishes a "helloworld"
-    void publish_ping();
+    /**
+    * Publishes PacketData as JSON to the channel "/data"
+    *
+    * @param packet Packet data used by FallDetector
+    * @returns True if successful
+    */
+    virtual bool send(PacketData packet) override;
+    
+    /**
+    * Publishes "helloworld" to the channel "/ping"
+    *
+    * @returns True if successful
+    */
+    virtual bool send(PingData) override;
 
-    // start the subscription of a topic, we will use it when receiving info
-    // from the broker / GUI
+    /** 
+    * Start the subscription of a topic, we will use it when receiving info
+    * from the broker / GUI
+    */
     bool subscribe(std::string_view topic,
                    u8_t qos = MQTT_SUBSCRIBE_QOS);
 
@@ -103,13 +116,50 @@ public:
     void stop();
 
 private:
-    static void s_pub_request_cb(void* arg, err_t err); // callback for connection with broker (every data we send)
-    static void s_sub_request_cb(void* arg, err_t err); // callback for connection from the broker (every data we receive)
-    static void s_dns_found(const char* hostname, const ip_addr_t* ipaddr, void* arg); // callback for resolved hostname, it checks if the IP is valid
-                                                                                       // and call "start_client" 
-    static void s_connection_cb(mqtt_client_t* client, void* arg, mqtt_connection_status_t status); // callback for connection attempt
-    static void s_incoming_publish_cb(void* arg, const char* topic, u32_t tot_len); // callback for handle when we publish data
-    static void s_incoming_data_cb(void* arg, const u8_t* data, u16_t len, u8_t flags); // callback for handle every fragment of payload that arrives
+    /**
+    * Callback for connection with broker (every data we send)
+    *
+    * @param arg Pointer to `MqttClient` (unchecked)
+    * @param err Error code corresponding to `err_enum_t` in <lwip/err.h>
+    */
+    static void s_pub_request_cb(void* arg, err_t err);
+    
+    /**
+    * Callback for connection from the broker (every data we receive)
+    *
+    * @param arg Pointer to MqttClient (unchecked)
+    * @param err Error code corresponding to `err_enum_t` in <lwip/err.h>
+    */
+    static void s_sub_request_cb(void* arg, err_t err);
+    
+    /**
+    * Callback for resolved hostname, it checks if the IP is valid
+    * and call "start_client"
+    *
+    * @param arg Pointer to MqttClient (unchecked)
+    */
+    static void s_dns_found(const char* hostname, const ip_addr_t* ipaddr, void* arg); 
+    
+    /**
+    * Callback for connection attempt
+    *
+    * @param arg Pointer to MqttClient (unchecked)
+    */
+    static void s_connection_cb(mqtt_client_t* client, void* arg, mqtt_connection_status_t status);
+    
+    /**
+    * Callback for handle when we publish data
+    *
+    * @param arg Pointer to MqttClient (unchecked)
+    */
+    static void s_incoming_publish_cb(void* arg, const char* topic, u32_t tot_len);
+    
+    /**
+    * Callback for handle every fragment of payload that arrives
+    *
+    * @param arg Pointer to MqttClient (unchecked)
+    */
+    static void s_incoming_data_cb(void* arg, const u8_t* data, u16_t len, u8_t flags);
 
     void handle_dns_found(const ip_addr_t* ipaddr);
     void handle_connection_status(mqtt_connection_status_t status);
@@ -120,16 +170,4 @@ private:
 
     void build_full_topic(std::string_view name,
                           std::array<char, MQTT_TOPIC_LEN>& out) const;
-
-private:
-    mqtt_client_t* client_;
-    mqtt_connect_client_info_t info_;
-    ip_addr_t server_addr_;
-    bool connect_done_;
-    bool stop_client_;
-
-    std::array<char, 64> client_id_;
-    std::array<char, MQTT_TOPIC_LEN> will_topic_;
-    std::array<char, MQTT_TOPIC_LEN> topic_;
-    std::array<char, MQTT_OUTPUT_RINGBUF_SIZE> data_;
 };
