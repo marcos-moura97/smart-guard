@@ -1,3 +1,5 @@
+# This library contains components that don't rely on any hardware-specific parts, and can seamlessly be tested on any device, not just the raspberry pico
+
 cmake_minimum_required(VERSION 3.13)
 
 set(CMAKE_C_STANDARD 11)
