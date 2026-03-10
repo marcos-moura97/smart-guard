@@ -28,9 +28,7 @@ if (EXISTS ${picoVscode})
 endif()
 # ====================================================================================
 # Pull in Raspberry Pi Pico SDK (must be before project)
-include("${CMAKE_SOURCE_DIR}/cmake/pico_sdk_import.cmake")
-# Enable warning flags
-#include("${CMAKE_SOURCE_DIR}/cmake/warnings.cmake")
+include("${CMAKE_SOURCE_DIR}/pico_sdk_import.cmake")
 #
 if(EXISTS "${CMAKE_SOURCE_DIR}/cmake/config.cmake")
     include("${CMAKE_SOURCE_DIR}/cmake/config.cmake")
@@ -66,6 +64,9 @@ add_executable(smart_guard
     main.cpp
     ${SOURCES}
 )
+
+# Enable warning flags
+include("${CMAKE_SOURCE_DIR}/cmake/warnings.cmake")
 
 if(PICO_BOARD STREQUAL "pico2_w")
     target_compile_definitions(smart_guard PRIVATE 

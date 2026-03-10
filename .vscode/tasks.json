@@ -5,11 +5,8 @@
             "label": "Compile Project",
             "type": "process",
             "isBuildCommand": true,
-            "command": "${userHome}/.pico-sdk/ninja/v1.12.1/ninja",
-            "args": [
-                "-C",
-                "${workspaceFolder}/build"
-            ],
+            "command": "ninja",
+            "args": ["-C", "${workspaceFolder}/build"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -17,7 +14,7 @@
             },
             "problemMatcher": "$gcc",
             "windows": {
-                "command": "${env:USERPROFILE}/.pico-sdk/ninja/v1.12.1/ninja.exe"
+                "command": "ninja.exe"
             }
         },
         {
@@ -54,7 +51,7 @@
             ],
             "problemMatcher": [],
             "windows": {
-                "command": "${env:USERPROFILE}/.pico-sdk/openocd/0.12.0+dev/openocd.exe"
+                "command": "${env:USERPROFILE}/.pico-sdk/openocd/0.12.0+dev/openocd.exe",
             }
         },
         {
@@ -73,7 +70,7 @@
             ],
             "problemMatcher": [],
             "windows": {
-                "command": "${env:USERPROFILE}/.pico-sdk/openocd/0.12.0+dev/openocd.exe"
+                "command": "${env:USERPROFILE}/.pico-sdk/openocd/0.12.0+dev/openocd.exe",
             }
         },
         {
@@ -98,15 +95,8 @@
             ],
             "problemMatcher": [],
             "windows": {
-                "command": "${env:USERPROFILE}/.pico-sdk/openocd/0.12.0+dev/openocd.exe"
+                "command": "${env:USERPROFILE}/.pico-sdk/openocd/0.12.0+dev/openocd.exe",
             }
-        },
-        {
-            "type": "cmake",
-            "label": "CMake: configure",
-            "command": "configure",
-            "problemMatcher": [],
-            "detail": "CMake template configure task"
         }
     ]
 }
