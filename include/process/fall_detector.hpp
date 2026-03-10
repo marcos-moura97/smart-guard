@@ -26,7 +26,7 @@ private:
     static constexpr microseconds_t FREE_FALL_TRIGGER_TIME {200*1000};
     static constexpr microseconds_t POST_FALL_TRIGGER_TIME {3000*1000};
     static constexpr microseconds_t TILT_WINDOW_TIME {500*1000};
-    static constexpr std::array<float, 2> FILTER_COEFFS {0.9f, 0.1f};
+    static constexpr std::array<float, 2> FILTER_COEFFS {0.999f, 0.001f}; // These are just a guess, and need to adjusted better
 
     // State pertaining to fall detection events (flags and timestamps)
     struct Events final
