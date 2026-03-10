@@ -48,7 +48,7 @@
     "clangd.arguments": [
         "--query-driver=${userHome}/.pico-sdk/toolchain/RISCV_ZCB_RPI_2_2_0_3/bin/riscv32-unknown-elf-gcc,${userHome}/.pico-sdk/toolchain/RISCV_ZCB_RPI_2_2_0_3/bin/riscv32-unknown-elf-g++",
         "--resource-dir=${userHome}/.pico-sdk/toolchain/RISCV_ZCB_RPI_2_2_0_3/lib/gcc/riscv32-unknown-elf/15.1.0/"
-    ]
+    ],
     "raspberry-pi-pico.cmakePath": "cmake",
     "raspberry-pi-pico.ninjaPath": "ninja"
 }
