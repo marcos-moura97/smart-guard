@@ -64,6 +64,7 @@ add_executable(smart_guard
     main.cpp
     ${SOURCES}
 )
+set(TARGET smart_guard)
 
 # Enable warning flags
 include("${CMAKE_SOURCE_DIR}/cmake/warnings.cmake")

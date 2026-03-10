@@ -1,6 +1,6 @@
 # Enable extra warnings and errors
-add_compile_options(-fdiagnostics-color=always)
-add_compile_options(
+target_compile_options(${TARGET} PRIVATE 
+    -fdiagnostics-color=always
     -Wall
     -Wextra
     -pedantic
@@ -70,7 +70,7 @@ add_compile_options(
 set(MAX_ERRORS 32)
 
 # Compiler specific warnings
-add_compile_options(
+target_compile_options(${TARGET} PRIVATE 
     -fmax-errors=${MAX_ERRORS}
     -Wformat-overflow=2
     -Wunused-local-typedefs
