@@ -1,0 +1,54 @@
+{
+    "cmake.showSystemKits": false,
+    "cmake.options.statusBarVisibility": "hidden",
+    "cmake.options.advanced": {
+        "build": {
+            "statusBarVisibility": "hidden"
+        },
+        "launch": {
+            "statusBarVisibility": "hidden"
+        },
+        "debug": {
+            "statusBarVisibility": "hidden"
+        }
+    },
+    "cmake.configureOnEdit": false,
+    "cmake.automaticReconfigure": false,
+    "cmake.configureOnOpen": false,
+    "cmake.generator": "Ninja",
+    "cmake.cmakePath": "cmake",
+    "C_Cpp.debugShortcut": false,
+    "terminal.integrated.env.windows": {
+        "PICO_SDK_PATH": "${env:USERPROFILE}/.pico-sdk/sdk/2.2.0",
+        "PICO_TOOLCHAIN_PATH": "${env:USERPROFILE}/.pico-sdk/toolchain/RISCV_ZCB_RPI_2_2_0_3",
+        "Path": "${env:USERPROFILE}/.pico-sdk/toolchain/RISCV_ZCB_RPI_2_2_0_3/bin;${env:USERPROFILE}/.pico-sdk/picotool/2.2.0-a4/picotool;;;${env:PATH}"
+    },
+    "terminal.integrated.env.osx": {
+        "PICO_SDK_PATH": "${env:HOME}/.pico-sdk/sdk/2.2.0",
+        "PICO_TOOLCHAIN_PATH": "${env:HOME}/.pico-sdk/toolchain/RISCV_ZCB_RPI_2_2_0_3",
+        "PATH": "${env:HOME}/.pico-sdk/toolchain/RISCV_ZCB_RPI_2_2_0_3/bin:${env:HOME}/.pico-sdk/picotool/2.2.0-a4/picotool:::${env:PATH}"
+    },
+    "terminal.integrated.env.linux": {
+        "PICO_SDK_PATH": "${env:HOME}/.pico-sdk/sdk/2.2.0",
+        "PICO_TOOLCHAIN_PATH": "${env:HOME}/.pico-sdk/toolchain/RISCV_ZCB_RPI_2_2_0_3",
+        "PATH": "${env:HOME}/.pico-sdk/toolchain/RISCV_ZCB_RPI_2_2_0_3/bin:${env:HOME}/.pico-sdk/picotool/2.2.0-a4/picotool:::${env:PATH}"
+    },
+    "raspberry-pi-pico.cmakeAutoConfigure": true,
+    "raspberry-pi-pico.useCmakeTools": false,
+    "files.associations": {
+        "fstream": "c",
+        "istream": "c",
+        "ostream": "c",
+        "sstream": "c",
+        "streambuf": "c",
+        "gpio.h": "c",
+        "compare": "cpp",
+        "cstdint": "cpp"
+    },
+    "clangd.arguments": [
+        "--query-driver=${userHome}/.pico-sdk/toolchain/RISCV_ZCB_RPI_2_2_0_3/bin/riscv32-unknown-elf-gcc,${userHome}/.pico-sdk/toolchain/RISCV_ZCB_RPI_2_2_0_3/bin/riscv32-unknown-elf-g++",
+        "--resource-dir=${userHome}/.pico-sdk/toolchain/RISCV_ZCB_RPI_2_2_0_3/lib/gcc/riscv32-unknown-elf/15.1.0/"
+    ],
+    "raspberry-pi-pico.cmakePath": "cmake",
+    "raspberry-pi-pico.ninjaPath": "ninja"
+}

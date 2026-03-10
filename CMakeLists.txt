@@ -3,8 +3,12 @@
 cmake_minimum_required(VERSION 3.13)
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 20) # previously set to 17
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
+set(CMAKE_CXX_EXTENSIONS ON)
+
+set(PICO_CYW43_ARCH_THREADSAFE_BACKGROUND 1)
+unset(PICO_PLATFORM CACHE)
 
 # Initialise pico_sdk from installed location
 # (note this can come from environment, CMake cache etc)
@@ -16,53 +20,99 @@ else()
     set(USERHOME $ENV{HOME})
 endif()
 set(sdkVersion 2.2.0)
-set(toolchainVersion 14_2_Rel1)
+set(toolchainVersion RISCV_ZCB_RPI_2_2_0_3)
 set(picotoolVersion 2.2.0-a4)
 set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
 if (EXISTS ${picoVscode})
     include(${picoVscode})
 endif()
 # ====================================================================================
-set(PICO_BOARD pico CACHE STRING "Board type")
-
 # Pull in Raspberry Pi Pico SDK (must be before project)
-include(pico_sdk_import.cmake)
+include("${CMAKE_SOURCE_DIR}/pico_sdk_import.cmake")
+#
+if(EXISTS "${CMAKE_SOURCE_DIR}/cmake/config.cmake")
+    include("${CMAKE_SOURCE_DIR}/cmake/config.cmake")
+else()
+    message(WARNING 
+        "Missing config.cmake\n"
+        "Some variables can be missing. Create cmake/config.cmake from cmake/config.cmake.example"
+    )
+endif()
+if(NOT DEFINED PICO_BOARD)
+    set(PICO_BOARD pico2_w CACHE INTERNAL "")
+endif()
 
-project(simple_blink C CXX ASM)
+project(smart_guard C CXX ASM)
+
+add_compile_definitions(
+    TF_LITE_STATIC_MEMORY
+    TF_LITE_DISABLE_X86_NEON
+    TFLITE_DISABLE_RUY
+)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-add_executable(simple_blink 
-    simple_blink.cpp
-    fall_detection_model.cc
+set(PROJECT_SOURCE_DIR src)
+file(GLOB_RECURSE SOURCES
+  CONFIGURE_DEPENDS
+    ${PROJECT_SOURCE_DIR}/*.c
+    ${PROJECT_SOURCE_DIR}/*.cpp
 )
 
-pico_set_program_name(simple_blink "simple_blink")
-pico_set_program_version(simple_blink "0.1")
+add_executable(smart_guard
+    main.cpp
+    ${SOURCES}
+)
+set(TARGET smart_guard)
+
+# Enable warning flags
+include("${CMAKE_SOURCE_DIR}/cmake/warnings.cmake")
+
+if(PICO_BOARD STREQUAL "pico2_w")
+    target_compile_definitions(smart_guard PRIVATE 
+        PICO_BOARD_PICO2_W=1
+        WIFI_SSID="${WIFI_SSID}"
+        WIFI_PASSWORD="${WIFI_PASSWORD}"
+        MQTT_SERVER="${MQTT_SERVER}"
+        MQTT_PORT_=${MQTT_PORT_}
+        MQTT_TLS_PORT=${MQTT_TLS_PORT}
+        MQTT_USERNAME="${MQTT_USERNAME}"
+        MQTT_PASSWORD="${MQTT_PASSWORD}"
+    )
+endif()
+
+pico_set_program_name(smart_guard "smart_guard")
+pico_set_program_version(smart_guard "0.1")
 
 # Generate PIO header
-pico_generate_pio_header(simple_blink ${CMAKE_CURRENT_LIST_DIR}/blink.pio)
+pico_generate_pio_header(smart_guard ${CMAKE_CURRENT_LIST_DIR}/smart_guard.pio)
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(simple_blink 0)
-pico_enable_stdio_usb(simple_blink 1)
+pico_enable_stdio_uart(smart_guard 0)
+pico_enable_stdio_usb(smart_guard 1)
 
 # Add the standard library to the build
-target_link_libraries(simple_blink
+target_link_libraries(smart_guard
     pico_stdlib
     hardware_i2c
 )
-
+if(PICO_BOARD STREQUAL "pico2_w")
+target_link_libraries(smart_guard
+    pico_cyw43_arch_lwip_threadsafe_background
+    pico_lwip_mqtt
+    pico_mbedtls
+    pico_lwip_mbedtls
+)
+endif()
 # Add the standard include files to the build
-target_include_directories(simple_blink PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}
+target_include_directories(smart_guard PUBLIC
+    include
 )
 
 # Add any user requested libraries
-target_link_libraries(simple_blink 
+target_link_libraries(smart_guard 
     hardware_pio
 )
 
-pico_add_extra_outputs(simple_blink)
-
+pico_add_extra_outputs(smart_guard)
