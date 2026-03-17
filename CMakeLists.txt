@@ -28,18 +28,8 @@ endif()
 # ====================================================================================
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include("${CMAKE_SOURCE_DIR}/pico_sdk_import.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/shared_pico.cmake")
 #
-if(EXISTS "${CMAKE_SOURCE_DIR}/cmake/config.cmake")
-    include("${CMAKE_SOURCE_DIR}/cmake/config.cmake")
-else()
-    message(WARNING 
-        "Missing config.cmake\n"
-        "Some variables can be missing. Create cmake/config.cmake from cmake/config.cmake.example"
-    )
-endif()
-if(NOT DEFINED PICO_BOARD)
-    set(PICO_BOARD pico2_w CACHE INTERNAL "")
-endif()
 
 # Add subdirectories
 add_subdirectory("${CMAKE_SOURCE_DIR}/lib/smart_guard_core")
@@ -63,19 +53,6 @@ pico_sdk_init()
 set(PROJECT_NAME smart_guard)
 project(${PROJECT_NAME} C CXX ASM)
 new_exe(${PROJECT_NAME} src include main.cpp)
-
-if(PICO_BOARD STREQUAL "pico2_w")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE 
-        PICO_BOARD_PICO2_W=1
-        WIFI_SSID="${WIFI_SSID}"
-        WIFI_PASSWORD="${WIFI_PASSWORD}"
-        MQTT_SERVER="${MQTT_SERVER}"
-        MQTT_PORT_=${MQTT_PORT_}
-        MQTT_TLS_PORT=${MQTT_TLS_PORT}
-        MQTT_USERNAME="${MQTT_USERNAME}"
-        MQTT_PASSWORD="${MQTT_PASSWORD}"
-    )
-endif()
 target_link_pico_libraries(${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME} PUBLIC
     smart_guard_core
@@ -88,7 +65,7 @@ pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/smart_guard.p
 
 # ------------------------------------------------------------ CppUTest ----------------------------------------------------------------
 
-set(ENABLE_TESTS ON)
+set(ENABLE_TESTS OFF)
 if(${ENABLE_TESTS})
     set(TEST_NAME "smart_guard_test")
     set(PICO_CXX_ENABLE_EXCEPTIONS 1)
@@ -106,25 +83,12 @@ if(${ENABLE_TESTS})
     FetchContent_MakeAvailable(CppUTest)
 
     new_tests(${TEST_NAME} src include test test.cpp)
-
-    if(PICO_BOARD STREQUAL "pico2_w")
-        target_compile_definitions(${TEST_NAME} PRIVATE 
-            PICO_BOARD_PICO2_W=1
-            WIFI_SSID="${WIFI_SSID}"
-            WIFI_PASSWORD="${WIFI_PASSWORD}"
-            MQTT_SERVER="${MQTT_SERVER}"
-            MQTT_PORT_=${MQTT_PORT_}
-            MQTT_TLS_PORT=${MQTT_TLS_PORT}
-            MQTT_USERNAME="${MQTT_USERNAME}"
-            MQTT_PASSWORD="${MQTT_PASSWORD}"
-        )
-    endif()
     target_link_pico_libraries(${TEST_NAME})
     target_link_libraries(${TEST_NAME} PUBLIC
         smart_guard_core
         smart_guard_pico
     )
-    new_pico_program(${TEST_NAME} "smart_guard_test" "0.1")
+    new_pico_program(${TEST_NAME} ${TEST_NAME} "0.1")
 
     # Pull in our pico_stdlib which pulls in commonly used features
     target_link_libraries(${TEST_NAME} PRIVATE

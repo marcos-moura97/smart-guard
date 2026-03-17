@@ -6,25 +6,51 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS ON)
 
-include("${CMAKE_SOURCE_DIR}/cmake/warnings.cmake")
+include("${CMAKE_SOURCE_DIR}/pico_sdk_import.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/shared_pico.cmake")
 
 set(PROJECT_NAME smart_guard_pico)
 project(${PROJECT_NAME} C CXX ASM)
 new_library(${PROJECT_NAME} src include)
-
-if(PICO_BOARD STREQUAL "pico2_w")
-  target_compile_definitions(${PROJECT_NAME} PRIVATE 
-    PICO_BOARD_PICO2_W=1
-    WIFI_SSID="${WIFI_SSID}"
-    WIFI_PASSWORD="${WIFI_PASSWORD}"
-    MQTT_SERVER="${MQTT_SERVER}"
-    MQTT_PORT_=${MQTT_PORT_}
-    MQTT_TLS_PORT=${MQTT_TLS_PORT}
-    MQTT_USERNAME="${MQTT_USERNAME}"
-    MQTT_PASSWORD="${MQTT_PASSWORD}"
-  )
-endif()
 target_link_pico_libraries(${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME} PUBLIC
   smart_guard_core
 )
+
+# ------------------------------------------------------------ CppUTest ----------------------------------------------------------------
+
+set(ENABLE_TESTS OFF)
+if(${ENABLE_TESTS})
+    set(TEST_NAME "smart_guard_pico_test")
+    set(PICO_CXX_ENABLE_EXCEPTIONS 1)
+    set(CPPUTEST_MEM_LEAK_DETECTION_DISABLED 1) # causes compile errors in standard library, so disabling this for now.
+
+    # CppUTest
+    include(FetchContent)
+    FetchContent_Declare(
+        CppUTest
+        GIT_REPOSITORY https://github.com/cpputest/cpputest.git
+        GIT_TAG        master # or use release tag, eg. v4.0
+    )
+    # Set this to ON if you want to have the CppUTests in your project as well.
+    set(TESTS OFF CACHE BOOL "Switch off CppUTest Test build")
+    FetchContent_MakeAvailable(CppUTest)
+
+    new_tests(${TEST_NAME} src include test test.cpp)
+    target_link_pico_libraries(${TEST_NAME})
+    target_link_libraries(${TEST_NAME} PUBLIC
+        smart_guard_core
+    )
+    #new_pico_program(${TEST_NAME} ${TEST_NAME} "0.1")
+
+    # Pull in our pico_stdlib which pulls in commonly used features
+    target_link_libraries(${TEST_NAME} PRIVATE
+        CppUTest::CppUTest
+        CppUTest::CppUTestExt
+    )
+
+    target_compile_definitions(${TEST_NAME} PRIVATE
+        PICO_CXX_DISABLE_ALLOCATION_OVERRIDES
+        CPPUTEST_HAVE_EXCEPTIONS=1
+    )
+endif()
