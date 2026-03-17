@@ -4,3 +4,4 @@ build
 .archdeps/*.pkg.tar.zst
 misc/bootselBoot
 cmake/config.cmake
+compile_commands.json
