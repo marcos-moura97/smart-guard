@@ -92,7 +92,7 @@ set(ENABLE_TESTS ON)
 if(${ENABLE_TESTS})
     set(TEST_NAME "smart_guard_test")
     set(PICO_CXX_ENABLE_EXCEPTIONS 1)
-    set(CPPUTEST_MEM_LEAK_DETECTION_DISABLED 1)
+    set(CPPUTEST_MEM_LEAK_DETECTION_DISABLED 1) # causes compile errors in standard library, so disabling this for now.
 
     # CppUTest
     include(FetchContent)
