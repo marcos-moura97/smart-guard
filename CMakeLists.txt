@@ -51,9 +51,6 @@ add_cxx_warnings(smart_guard)
 add_cxx_warnings(smart_guard_core)
 add_cxx_warnings(smart_guard_pico)
 
-set(PROJECT smart_guard)
-project(${PROJECT} C CXX ASM)
-
 add_compile_definitions(
     TF_LITE_STATIC_MEMORY
     TF_LITE_DISABLE_X86_NEON
@@ -63,24 +60,12 @@ add_compile_definitions(
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-set(PROJECT_SOURCE_DIR src)
-set(PROJECT_INCLUDE_DIR include)
-
-file(GLOB_RECURSE SOURCES
-  CONFIGURE_DEPENDS
-    ${PROJECT_SOURCE_DIR}/*.c
-    ${PROJECT_SOURCE_DIR}/*.cpp
-)
-
-add_executable(${PROJECT}
-    ${SOURCES}
-    main.cpp
-)
-add_cxx_warnings(${PROJECT})
-target_include_directories(${PROJECT} PUBLIC ${PROJECT_INCLUDE_DIR})
+set(PROJECT_NAME smart_guard)
+project(${PROJECT_NAME} C CXX ASM)
+new_exe(${PROJECT_NAME} src include main.cpp)
 
 if(PICO_BOARD STREQUAL "pico2_w")
-    target_compile_definitions(${PROJECT} PRIVATE 
+    target_compile_definitions(${PROJECT_NAME} PRIVATE 
         PICO_BOARD_PICO2_W=1
         WIFI_SSID="${WIFI_SSID}"
         WIFI_PASSWORD="${WIFI_PASSWORD}"
@@ -91,35 +76,64 @@ if(PICO_BOARD STREQUAL "pico2_w")
         MQTT_PASSWORD="${MQTT_PASSWORD}"
     )
 endif()
-
-# Add the standard library to the build
-target_link_libraries(${PROJECT}
-    pico_stdlib
-    hardware_i2c
-)
-if(PICO_BOARD STREQUAL "pico2_w")
-    target_link_libraries(${PROJECT}
-        pico_cyw43_arch_lwip_threadsafe_background
-        pico_lwip_mqtt
-        pico_mbedtls
-        pico_lwip_mbedtls
-    )
-endif()
-# Add any user requested libraries
-target_link_libraries(${PROJECT}
-    hardware_pio
+target_link_pico_libraries(${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} PUBLIC
     smart_guard_core
     smart_guard_pico
 )
-
-pico_set_program_name(${PROJECT} "smart_guard")
-pico_set_program_version(${PROJECT} "0.1")
+new_pico_program(${PROJECT_NAME} "smart_guard" "0.1")
 
 # Generate PIO header
-pico_generate_pio_header(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/smart_guard.pio)
+pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/smart_guard.pio)
 
-# Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(${PROJECT} 0)
-pico_enable_stdio_usb(${PROJECT} 1)
+# ------------------------------------------------------------ CppUTest ----------------------------------------------------------------
 
-pico_add_extra_outputs(${PROJECT})
+set(ENABLE_TESTS ON)
+if(${ENABLE_TESTS})
+    set(TEST_NAME "smart_guard_test")
+    set(PICO_CXX_ENABLE_EXCEPTIONS 1)
+    set(CPPUTEST_MEM_LEAK_DETECTION_DISABLED 1)
+
+    # CppUTest
+    include(FetchContent)
+    FetchContent_Declare(
+        CppUTest
+        GIT_REPOSITORY https://github.com/cpputest/cpputest.git
+        GIT_TAG        master # or use release tag, eg. v4.0
+    )
+    # Set this to ON if you want to have the CppUTests in your project as well.
+    set(TESTS OFF CACHE BOOL "Switch off CppUTest Test build")
+    FetchContent_MakeAvailable(CppUTest)
+
+    new_tests(${TEST_NAME} src include test test.cpp)
+
+    if(PICO_BOARD STREQUAL "pico2_w")
+        target_compile_definitions(${TEST_NAME} PRIVATE 
+            PICO_BOARD_PICO2_W=1
+            WIFI_SSID="${WIFI_SSID}"
+            WIFI_PASSWORD="${WIFI_PASSWORD}"
+            MQTT_SERVER="${MQTT_SERVER}"
+            MQTT_PORT_=${MQTT_PORT_}
+            MQTT_TLS_PORT=${MQTT_TLS_PORT}
+            MQTT_USERNAME="${MQTT_USERNAME}"
+            MQTT_PASSWORD="${MQTT_PASSWORD}"
+        )
+    endif()
+    target_link_pico_libraries(${TEST_NAME})
+    target_link_libraries(${TEST_NAME} PUBLIC
+        smart_guard_core
+        smart_guard_pico
+    )
+    new_pico_program(${TEST_NAME} "smart_guard_test" "0.1")
+
+    # Pull in our pico_stdlib which pulls in commonly used features
+    target_link_libraries(${TEST_NAME} PRIVATE
+        CppUTest::CppUTest
+        CppUTest::CppUTestExt
+    )
+
+    target_compile_definitions(${TEST_NAME} PRIVATE
+        PICO_CXX_DISABLE_ALLOCATION_OVERRIDES
+        CPPUTEST_HAVE_EXCEPTIONS=1
+    )
+endif()
