@@ -3,11 +3,10 @@
 cmake_minimum_required(VERSION 3.13)
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 20) # previously set to 17
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
-set(PICO_CYW43_ARCH_THREADSAFE_BACKGROUND 1)
 unset(PICO_PLATFORM CACHE)
 
 # Initialise pico_sdk from installed location
@@ -42,7 +41,18 @@ if(NOT DEFINED PICO_BOARD)
     set(PICO_BOARD pico2_w CACHE INTERNAL "")
 endif()
 
-project(smart_guard C CXX ASM)
+# Add subdirectories
+add_subdirectory("${CMAKE_SOURCE_DIR}/lib/smart_guard_core")
+add_subdirectory("${CMAKE_SOURCE_DIR}/lib/smart_guard_pico")
+
+# Enable warning flags
+include("${CMAKE_SOURCE_DIR}/cmake/warnings.cmake")
+add_cxx_warnings(smart_guard)
+add_cxx_warnings(smart_guard_core)
+add_cxx_warnings(smart_guard_pico)
+
+set(PROJECT smart_guard)
+project(${PROJECT} C CXX ASM)
 
 add_compile_definitions(
     TF_LITE_STATIC_MEMORY
@@ -54,23 +64,23 @@ add_compile_definitions(
 pico_sdk_init()
 
 set(PROJECT_SOURCE_DIR src)
+set(PROJECT_INCLUDE_DIR include)
+
 file(GLOB_RECURSE SOURCES
   CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/*.c
     ${PROJECT_SOURCE_DIR}/*.cpp
 )
 
-add_executable(smart_guard
-    main.cpp
+add_executable(${PROJECT}
     ${SOURCES}
+    main.cpp
 )
-set(TARGET smart_guard)
-
-# Enable warning flags
-include("${CMAKE_SOURCE_DIR}/cmake/warnings.cmake")
+add_cxx_warnings(${PROJECT})
+target_include_directories(${PROJECT} PUBLIC ${PROJECT_INCLUDE_DIR})
 
 if(PICO_BOARD STREQUAL "pico2_w")
-    target_compile_definitions(smart_guard PRIVATE 
+    target_compile_definitions(${PROJECT} PRIVATE 
         PICO_BOARD_PICO2_W=1
         WIFI_SSID="${WIFI_SSID}"
         WIFI_PASSWORD="${WIFI_PASSWORD}"
@@ -82,37 +92,34 @@ if(PICO_BOARD STREQUAL "pico2_w")
     )
 endif()
 
-pico_set_program_name(smart_guard "smart_guard")
-pico_set_program_version(smart_guard "0.1")
-
-# Generate PIO header
-pico_generate_pio_header(smart_guard ${CMAKE_CURRENT_LIST_DIR}/smart_guard.pio)
-
-# Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(smart_guard 0)
-pico_enable_stdio_usb(smart_guard 1)
-
 # Add the standard library to the build
-target_link_libraries(smart_guard
+target_link_libraries(${PROJECT}
     pico_stdlib
     hardware_i2c
 )
 if(PICO_BOARD STREQUAL "pico2_w")
-target_link_libraries(smart_guard
-    pico_cyw43_arch_lwip_threadsafe_background
-    pico_lwip_mqtt
-    pico_mbedtls
-    pico_lwip_mbedtls
-)
+    target_link_libraries(${PROJECT}
+        pico_cyw43_arch_lwip_threadsafe_background
+        pico_lwip_mqtt
+        pico_mbedtls
+        pico_lwip_mbedtls
+    )
 endif()
-# Add the standard include files to the build
-target_include_directories(smart_guard PUBLIC
-    include
-)
-
 # Add any user requested libraries
-target_link_libraries(smart_guard 
+target_link_libraries(${PROJECT}
     hardware_pio
+    smart_guard_core
+    smart_guard_pico
 )
 
-pico_add_extra_outputs(smart_guard)
+pico_set_program_name(${PROJECT} "smart_guard")
+pico_set_program_version(${PROJECT} "0.1")
+
+# Generate PIO header
+pico_generate_pio_header(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/smart_guard.pio)
+
+# Modify the below lines to enable/disable output over UART/USB
+pico_enable_stdio_uart(${PROJECT} 0)
+pico_enable_stdio_usb(${PROJECT} 1)
+
+pico_add_extra_outputs(${PROJECT})

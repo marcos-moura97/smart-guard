@@ -48,7 +48,7 @@ int main()
         sleep_ms(1000);
     }
     
-    return 0; 
+    return 0;
 }
 
 int test_imu()

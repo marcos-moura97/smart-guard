@@ -1,5 +1,5 @@
-#include <cmath>
 #include <data.hpp>
+#include <cmath>
 #include <format>
 
 std::array<float, 2> ImuData::accel_angles(void) const

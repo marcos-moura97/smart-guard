@@ -11,7 +11,7 @@
 #include <pico/time.h>
 #include <pico/types.h>
 #include <dsp/fir_filter.hpp>
-#include <Kalman.h>
+#include <dsp/kalman.hpp>
 #include <device/gpio.hpp>
 #include <delta_time.hpp>
 

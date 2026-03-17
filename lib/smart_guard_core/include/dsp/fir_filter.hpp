@@ -12,9 +12,9 @@ class FirFilter final
 private:
     static constexpr std::size_t LENGTH {ORDER + 1};
 
-    const std::array<float, LENGTH> numer;
+    const std::array<float, LENGTH> _numer;
 
-    std::array<float, ORDER> buffer;
+    std::array<float, ORDER> _buffer;
 
 public:
     FirFilter(void) = delete;

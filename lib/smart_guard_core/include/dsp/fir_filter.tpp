@@ -3,12 +3,12 @@
 
 template<std::size_t ORDER>
 constexpr FirFilter<ORDER>::FirFilter(std::array<float, LENGTH> numer):
-    numer(std::move(numer)),
-    buffer()
+    _numer(std::move(numer)),
+    _buffer()
 {
     // Are arrays zeroed when default-constructed?
     // Zeroing explicitly just to be sure. Not sure if necessary.
-    this->buffer.fill(0);
+    this->_buffer.fill(0);
 }
 
 template<std::size_t ORDER>
@@ -19,11 +19,11 @@ float FirFilter<ORDER>::operator()(float x)
     // Each delayed value of `x` in the buffer is multiplied with its corresponding coefficient, then summed.
     // Should work with any filter order
     float y {0.0};
-    auto b {this->numer.crbegin()};
-    if(b != this->numer.crend())
+    auto b {this->_numer.crbegin()};
+    if(b != this->_numer.crend())
     {
         y += x**b;
-        for(float& w : this->buffer)
+        for(float& w : this->_buffer)
         {   
             ++b;
             std::swap(w, x);

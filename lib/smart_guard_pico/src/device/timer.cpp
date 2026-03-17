@@ -4,7 +4,7 @@ Timer::Timer(void) noexcept:
     _process(nullptr),
     _timer(nullptr)
 {
-
+    
 }
 Timer::Timer(Timer&& timer) noexcept:
     _process(std::move(timer._process)),
