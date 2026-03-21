@@ -1,4 +1,5 @@
 include("${CMAKE_SOURCE_DIR}/pico_sdk_import.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/shared.cmake")
 if(EXISTS "${CMAKE_SOURCE_DIR}/cmake/config.cmake")
     include("${CMAKE_SOURCE_DIR}/cmake/config.cmake")
 else()
