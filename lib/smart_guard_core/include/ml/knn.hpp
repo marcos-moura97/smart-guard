@@ -1,13 +1,10 @@
 #pragma once
 
+#include <cassert>
+#include <ranges>
 #include <algorithm>
-#include <array>
-#include <compare>
 #include <concepts>
-#include <cstddef>
 #include <iterator>
-#include <memory>
-#include <numeric>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -23,9 +20,9 @@ namespace ml
     >
     K knn(
         K k_begin,
-        const K& k_end,
+        K k_end,
         Y y_begin,
-        const Y& y_end,
+        Y y_end,
         const X& x,
         D&& distance_function,
         C&& distance_cmp
@@ -78,24 +75,175 @@ namespace ml
     >
     K knn(
         K k_begin,
-        const K& k_end,
+        K k_end,
         Y y_begin,
-        const Y& y_end,
+        Y y_end,
         const X& x,
         D&& distance_function
     )
     {
         return knn(
             std::move(k_begin),
-            k_end,
+            std::move(k_end),
             std::move(y_begin),
-            y_end,
+            std::move(y_end),
             x,
-            distance_function,
+            std::forward<D>(distance_function),
             [](const auto& lhs, const auto& rhs)
             {
                 return lhs <=> rhs;
             }
+        );
+    }
+
+    template<
+        std::ranges::range K,
+        std::forward_iterator Y,
+        typename X,
+        std::invocable<const X&, const std::iter_value_t<Y>&> D,
+        std::invocable<const std::invoke_result_t<D, const X&, const std::iter_value_t<Y>&>&, const std::invoke_result_t<D, const X&, const std::iter_value_t<Y>&>&> C
+    >
+    std::ranges::iterator_t<K> knn(
+        K& k,
+        Y y_begin,
+        Y y_end,
+        const X& x,
+        D&& distance_function,
+        C&& distance_cmp
+    )
+    {
+        return knn(
+            k.begin(),
+            k.end(),
+            std::move(y_begin),
+            std::move(y_end),
+            x,
+            std::forward<D>(distance_function),
+            std::forward<C>(distance_cmp)
+        );
+    }
+
+    template<
+        std::ranges::range K,
+        std::forward_iterator Y,
+        typename X,
+        std::invocable<const X&, const std::iter_value_t<Y>&> D
+    >
+    std::ranges::iterator_t<K> knn(
+        K& k,
+        Y y_begin,
+        Y y_end,
+        const X& x,
+        D&& distance_function
+    )
+    {
+        return knn(
+            k.begin(),
+            k.end(),
+            std::move(y_begin),
+            std::move(y_end),
+            x,
+            std::forward<D>(distance_function)
+        );
+    }
+
+    template<
+        std::forward_iterator K,
+        std::ranges::range Y,
+        typename X,
+        std::invocable<const X&, const std::ranges::range_value_t<Y>&> D,
+        std::invocable<const std::invoke_result_t<D, const X&, const std::ranges::range_value_t<Y>&>&, const std::invoke_result_t<D, const X&, const std::ranges::range_value_t<Y>&>&> C
+    >
+    K knn(
+        K k_begin,
+        K k_end,
+        const Y& y,
+        const X& x,
+        D&& distance_function,
+        C&& distance_cmp
+    )
+    {
+        return knn(
+            std::move(k_begin),
+            std::move(k_end),
+            y.cbegin(),
+            y.cend(),
+            x,
+            std::forward<D>(distance_function),
+            std::forward<C>(distance_cmp)
+        );
+    }
+
+    template<
+        std::forward_iterator K,
+        std::ranges::range Y,
+        typename X,
+        std::invocable<const X&, const std::ranges::range_value_t<Y>&> D
+    >
+    K knn(
+        K k_begin,
+        K k_end,
+        const Y& y,
+        const X& x,
+        D&& distance_function
+    )
+    {
+        return knn(
+            std::move(k_begin),
+            std::move(k_end),
+            y.cbegin(),
+            y.cend(),
+            x,
+            std::forward<D>(distance_function)
+        );
+    }
+
+    template<
+        std::ranges::range K,
+        std::ranges::range Y,
+        typename X,
+        std::invocable<const X&, const std::ranges::range_value_t<Y>&> D,
+        std::invocable<const std::invoke_result_t<D, const X&, const std::ranges::range_value_t<Y>&>&, const std::invoke_result_t<D, const X&, const std::ranges::range_value_t<Y>&>&> C
+    >
+    std::ranges::iterator_t<K> knn(
+        K& k,
+        const Y& y,
+        const X& x,
+        D&& distance_function,
+        C&& distance_cmp
+    )
+    {
+        return knn(
+            k.begin(),
+            k.end(),
+            y.cbegin(),
+            y.cend(),
+            x,
+            std::forward<D>(distance_function),
+            std::forward<C>(distance_cmp)
+        );
+    }
+
+    template<
+        std::ranges::range K,
+        std::ranges::range Y,
+        typename X,
+        std::invocable<const X&, const std::ranges::range_value_t<Y>&> D
+    >
+    std::ranges::iterator_t<K> knn(
+        K& k,
+        const Y& y,
+        const X& x,
+        D&& distance_function
+    )
+    {
+        return knn(
+            k.begin(),
+            k.end(),
+            y.cbegin(),
+            y.cend(),
+            x,
+            std::forward<D>(distance_function)
         );
     }
 }
