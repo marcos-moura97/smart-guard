@@ -2,7 +2,7 @@
 #include <dsp/fir_filter.hpp>
 
 template<std::size_t ORDER>
-constexpr FirFilter<ORDER>::FirFilter(std::array<float, LENGTH> numer):
+constexpr dsp::FirFilter<ORDER>::FirFilter(std::array<float, LENGTH> numer):
     _numer(std::move(numer)),
     _buffer()
 {
@@ -12,7 +12,7 @@ constexpr FirFilter<ORDER>::FirFilter(std::array<float, LENGTH> numer):
 }
 
 template<std::size_t ORDER>
-float FirFilter<ORDER>::operator()(float x)
+float dsp::FirFilter<ORDER>::operator()(float x)
 {
     // This is the FIR filter algorithm
     // `x` is pushed into the buffer.

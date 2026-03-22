@@ -1,36 +1,39 @@
 #pragma once
 #include <array>
 
-/**
-* An FIR (finite impulse response) discrete-time filter.
-* The filter order is configurable.
-* @param ORDER Filter order.
-*/
-template<std::size_t ORDER>
-class FirFilter final
+namespace dsp
 {
-private:
-    static constexpr std::size_t LENGTH {ORDER + 1};
-
-    const std::array<float, LENGTH> _numer;
-
-    std::array<float, ORDER> _buffer;
-
-public:
-    FirFilter(void) = delete;
-
     /**
-    * Initialize a FIR filter with the given coefficients
-    * @param numer Numerator coefficients of filter
+    * An FIR (finite impulse response) discrete-time filter.
+    * The filter order is configurable.
+    * @param ORDER Filter order.
     */
-    constexpr FirFilter(std::array<float, LENGTH> numer);
+    template<std::size_t ORDER>
+    class FirFilter final
+    {
+    private:
+        static constexpr std::size_t LENGTH {ORDER + 1};
 
-    /**
-    * Runs the FIR filter SISO algorithm
-    * @param x Filter input
-    * @return Filter output
-    */
-    float operator()(float x);
-};
+        const std::array<float, LENGTH> _numer;
+
+        std::array<float, ORDER> _buffer;
+
+    public:
+        FirFilter(void) = delete;
+
+        /**
+        * Initialize a FIR filter with the given coefficients
+        * @param numer Numerator coefficients of filter
+        */
+        constexpr FirFilter(std::array<float, LENGTH> numer);
+
+        /**
+        * Runs the FIR filter SISO algorithm
+        * @param x Filter input
+        * @return Filter output
+        */
+        float operator()(float x);
+    };
+}
 
 #include <dsp/fir_filter.tpp>

@@ -86,8 +86,8 @@ private:
     bool _fall_detected {false};
 
     // Filtering
-    std::array<FirFilter<1>, 3> _filter_accel {FILTER_COEFFS, FILTER_COEFFS, FILTER_COEFFS};
-    std::array<FirFilter<1>, 3> _filter_gyro {FILTER_COEFFS, FILTER_COEFFS, FILTER_COEFFS};
+    std::array<dsp::FirFilter<1>, 3> _filter_accel {FILTER_COEFFS, FILTER_COEFFS, FILTER_COEFFS};
+    std::array<dsp::FirFilter<1>, 3> _filter_gyro {FILTER_COEFFS, FILTER_COEFFS, FILTER_COEFFS};
     Kalman _kalman_pitch {};
     Kalman _kalman_roll {};
     bool _is_kalman_calibrated {false};
