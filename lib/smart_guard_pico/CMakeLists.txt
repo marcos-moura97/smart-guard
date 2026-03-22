@@ -9,6 +9,11 @@ set(CMAKE_CXX_EXTENSIONS ON)
 include("${CMAKE_SOURCE_DIR}/pico_sdk_import.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/shared_pico.cmake")
 
+# Not good but i guess it's needed because variables in cmake don't seem to predictably carry over to subfolder cmakelists... or not, either way it works for now
+if(NOT DEFINED PICO_BOARD)
+    set(PICO_BOARD pico2_w CACHE INTERNAL "")
+endif()
+
 set(PROJECT_NAME smart_guard_pico)
 project(${PROJECT_NAME} C CXX ASM)
 new_library(${PROJECT_NAME} src include)
