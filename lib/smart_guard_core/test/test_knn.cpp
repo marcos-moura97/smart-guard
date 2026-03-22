@@ -36,5 +36,7 @@ TEST(Knn, ItWorks)
         }
     );
 
+    // TODO: how do i assert using CppUTest?
+
     FAIL("Fail me!");
 }
