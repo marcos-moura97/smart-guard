@@ -40,7 +40,6 @@ if(${ENABLE_TESTS})
     )
 
     target_compile_definitions(${TEST_NAME} PRIVATE
-        PICO_CXX_DISABLE_ALLOCATION_OVERRIDES
         CPPUTEST_HAVE_EXCEPTIONS=1
     )
 endif()
