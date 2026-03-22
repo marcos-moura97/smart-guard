@@ -11,6 +11,9 @@
 
 namespace ml
 {
+    // This is an attempt for wring a k-Nearest-Neighbor algorithm.
+    // Not sure if we need it, but i guess it could be useful for testing any kind of neural net if we ever add one.
+    // I wrote this mostly as an exercise to understand a related paper and also to try out the new unit test framework. Maybe we need it later, i don't know...!
     template<
         std::forward_iterator K,
         std::forward_iterator Y,

@@ -5,8 +5,10 @@
 
 TEST_GROUP(FirFilter)
 {
+    
 };
 
+/// Checks numerical precision of the FIR filter by applying it to a unit impulse and comparing the result with its own coefficients.
 TEST(FirFilter, FirIdentity)
 {
     using f_t = float;
@@ -23,6 +25,8 @@ TEST(FirFilter, FirIdentity)
     for(std::size_t n {0}; n < N; ++n)
     {
         x[n] = filter(x[n]);
+
+        // We require a low enough error
         CHECK_TRUE(std::abs(x[n] - h[n]) <= PRECISION);
     }
 }

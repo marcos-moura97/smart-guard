@@ -6,9 +6,10 @@
 
 TEST_GROUP(Knn)
 {
-    
+
 };
 
+/// Tests a single case for the K-Nearest-Neighbour algorithm
 TEST(Knn, ItWorks)
 {
     constexpr std::size_t K {3};
