@@ -5,7 +5,7 @@ extern "C" bool process_update_timer_callback(repeating_timer_t* timer)
 {
     // WARNING: There could be nullpointer exceptions happening here, but i want to test nullability first by using assertions.
     // Getting the behaviour of the destructor right could need a bit of trial and error (with my limited knowledge)
-    // TODO: make this more robust later
+    // Update: this seems to work fine. No problems yet! :)
     assert(timer);
     assert(timer->user_data);
 
