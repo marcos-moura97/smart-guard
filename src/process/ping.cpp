@@ -2,13 +2,13 @@
 #include <hardware/gpio.h>
 #include <process/ping.hpp>
 
-Ping::Ping(std::function<void()> on_update): 
+process::Ping::Ping(std::function<void()> on_update): 
     _on_update(on_update)
 {
     std::printf("Ping process started!");
 }
 
-Process::Update Ping::update(void)
+process::Update process::Ping::update(void)
 {
     if(this->_on_update)
     {

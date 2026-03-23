@@ -14,7 +14,7 @@ Timer::Timer(Timer&& timer) noexcept:
     assert(!timer._timer);
 }
 
-Timer::Timer(std::unique_ptr<Process>&& process, microseconds_t delay):
+Timer::Timer(std::unique_ptr<process::Process>&& process, microseconds_t delay):
     _process(std::move(process)),
     _timer(this->_process ? std::make_unique<repeating_timer_t>(repeating_timer_t(0)) : nullptr)
 {
@@ -23,7 +23,7 @@ Timer::Timer(std::unique_ptr<Process>&& process, microseconds_t delay):
         assert(this->_timer);
         add_repeating_timer_us(
             delay.count(), // should convert into microseconds
-            process_update_timer_callback,
+            Timer::__process_update_timer_callback,
             this->_process.get(),
             this->_timer.get()
         );
@@ -63,7 +63,7 @@ Timer& Timer::operator=(Timer&& timer)
     return *this;
 }
 
-std::unique_ptr<Process> Timer::operator*(void) &&
+std::unique_ptr<process::Process> Timer::operator*(void) &&
 {
     if(this->_timer)
     {
@@ -71,7 +71,7 @@ std::unique_ptr<Process> Timer::operator*(void) &&
         this->_timer = nullptr;
     }
 
-    std::unique_ptr<Process> process {std::move(this->_process)};
+    std::unique_ptr<process::Process> process {std::move(this->_process)};
     assert(!this->_process);
     assert(!this->_timer);
     
@@ -97,4 +97,25 @@ Timer::Status Timer::status(void) const
         return Status::running;
     }
     return Status::stopped;
+}
+
+bool Timer::__process_update_timer_callback(repeating_timer_t* timer)
+{
+    // WARNING: There could be nullpointer exceptions happening here, but i want to test nullability first by using assertions.
+    // Getting the behaviour of the destructor right could need a bit of trial and error (with my limited knowledge)
+    // Update: this seems to work fine. No problems yet! :)
+    assert(timer);
+    assert(timer->user_data);
+
+    void* process_untyped {timer->user_data};
+    process::Process* process {static_cast<process::Process*>(process_untyped)};
+    process::Update result {process->update()};
+    switch(result)
+    {
+        case process::Update::done:
+            return false;
+        case process::Update::pending:
+            return true;
+    }
+    return false;
 }

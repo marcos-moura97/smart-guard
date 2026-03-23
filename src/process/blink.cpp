@@ -2,13 +2,13 @@
 #include <hardware/gpio.h>
 #include <process/blink.hpp>
 
-Blink::Blink(void):
+process::Blink::Blink(void):
     _led(false)
 {
     std::printf("Blink process started!");
 }
 
-Process::Update Blink::update(void)
+process::Update process::Blink::update(void)
 {
     this->_led.toggle();
 

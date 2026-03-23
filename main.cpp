@@ -34,7 +34,7 @@ int main()
     //Mpu6050 imu(i2c, Mpu6050::DEFAULT_SLAVE_ADDRESS, Mpu6050::AccelRange::G2, Mpu6050::GyroRange::D250);
 
     Timer blink(
-        Blink(),
+        process::Blink(),
         std::chrono::seconds(1) // 1 Hz
     );
 
@@ -106,7 +106,7 @@ int test_wifi()
     }
 
     Timer ping(
-        Ping([&mqtt]() { mqtt.send(PingData()); }),
+        process::Ping([&mqtt]() { mqtt.send(PingData()); }),
         std::chrono::seconds(1)
     );
 

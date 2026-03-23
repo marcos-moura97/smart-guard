@@ -13,7 +13,7 @@
 #include <pico/types.h>
 #include <process/fall_detector.hpp>
 
-FallDetector::FallDetector(GpioButton button, GpioEmergencyLed emergency_led, Mpu6050 imu, std::shared_ptr<Send<PacketData>> client):
+process::FallDetector::FallDetector(GpioButton button, GpioEmergencyLed emergency_led, Mpu6050 imu, std::shared_ptr<Send<PacketData>> client):
     _button(std::move(button)),
     _emergency_led(std::move(emergency_led)),
     _imu(std::move(imu)),
@@ -23,7 +23,7 @@ FallDetector::FallDetector(GpioButton button, GpioEmergencyLed emergency_led, Mp
     
 }
 
-Process::Update FallDetector::update(void)
+process::Update process::FallDetector::update(void)
 {
     const SensorData sensor_data {this->measure()};
     
@@ -74,7 +74,7 @@ Process::Update FallDetector::update(void)
     return Update::pending;
 }
 
-SensorData FallDetector::measure(void)
+SensorData process::FallDetector::measure(void)
 {
     // Read from IMU
     ImuData imu_dat {this->_imu.measure()};
@@ -95,7 +95,7 @@ SensorData FallDetector::measure(void)
 
 // Detects events related to fall detection
 // Pre-collection events
-void FallDetector::analyze(const SensorData& sensor_data)
+void process::FallDetector::analyze(const SensorData& sensor_data)
 {
     const auto [ax_g, ay_g, az_g] = sensor_data.imu.accel;
     const auto [gx, gy, gz] = sensor_data.imu.gyro;
@@ -185,7 +185,7 @@ void FallDetector::analyze(const SensorData& sensor_data)
 }
 
 // Post-collection events
-std::optional<bool> FallDetector::evaluate(const PacketData& packet_data) const
+std::optional<bool> process::FallDetector::evaluate(const PacketData& packet_data) const
 {
     // 7) FALL DETECTION (TRIGGER WARNING)
     if (this->_events.post_fall.has_value())
@@ -215,7 +215,7 @@ std::optional<bool> FallDetector::evaluate(const PacketData& packet_data) const
 }
 
 // Collects the data to be sent to the client / host
-PacketData FallDetector::collect(const SensorData& sensor_data)
+PacketData process::FallDetector::collect(const SensorData& sensor_data)
 {
     const auto [ax_g, ay_g, az_g] = sensor_data.imu.accel;
     const auto [gx, gy, gz] = sensor_data.imu.gyro;
@@ -251,7 +251,7 @@ PacketData FallDetector::collect(const SensorData& sensor_data)
 }
 
 // Applies a kalman filter to the pitch and roll
-Direction FallDetector::filter_direction(Direction direction, const ImuData& imu_data)
+Direction process::FallDetector::filter_direction(Direction direction, const ImuData& imu_data)
 {
     static constexpr double KALMAN_TORQUE_SCALING {131.0}; // What does this number correspond to?
 
@@ -283,19 +283,19 @@ Direction FallDetector::filter_direction(Direction direction, const ImuData& imu
     return direction;
 }
 
-bool FallDetector::Events::is_free_fall(void) const
+bool process::FallDetector::Events::is_free_fall(void) const
 {
     return this->free_fall.has_value() && this->free_fall->is_free_fall;
 }
-bool FallDetector::Events::is_impact(void) const
+bool process::FallDetector::Events::is_impact(void) const
 {
     return this->impact.has_value();
 }
-bool FallDetector::Events::is_tilt_change(void) const
+bool process::FallDetector::Events::is_tilt_change(void) const
 {
     return this->tilt_change.has_value() && this->tilt_change->is_tilt_change;
 }
-bool FallDetector::Events::is_monitoring_post_fall(void) const
+bool process::FallDetector::Events::is_monitoring_post_fall(void) const
 {
     return this->post_fall.has_value();
 }

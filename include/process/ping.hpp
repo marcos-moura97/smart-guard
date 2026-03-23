@@ -1,5 +1,5 @@
 #pragma once
-#include <process.hpp>
+#include <process/process.hpp>
 #include <pico/types.h>
 #include <device/gpio.hpp>
 #include <functional>
@@ -10,13 +10,16 @@
 #include <boards/pico2.h>
 #endif
 
-class Ping : public Process
+namespace process
 {
-private:    
-    std::function<void()> _on_update;
-public:
-    Ping(std::function<void()> on_update = nullptr);
+    class Ping : public Process
+    {
+    private:    
+        std::function<void()> _on_update;
+    public:
+        Ping(std::function<void()> on_update = nullptr);
 
-protected:
-    virtual Update update(void) override;
-};
+    protected:
+        virtual Update update(void) override;
+    };
+}
