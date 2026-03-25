@@ -1,31 +1,117 @@
-# not sure if this will work, so we're not enabling automated runs yet
 name: Build
 on:
   schedule:
-    - cron: '29 15 * * *'
+    - cron: "29 15 * * *"
   push:
-    branches: [ "dev-refactor" ]
+    branches: ["dev-refactor"]
   pull_request:
-    branches: [ "dev-refactor" ]
-#env:
-  #RUST_BACKTRACE: 1
-  #RUST_LOG: "cargo_tarpaulin=trace,llvm_profparser=trace"
+    branches: ["dev-refactor"]
+
+env:
+  PICO_BOARD: pico2_w
+  PICO_PLATFORM: rp2350-riscv
+  PICO_SDK_PATH: ${{ github.workspace }}/pico-sdk
+  TOOLCHAIN_DIR: ${{ github.workspace }}/riscv-toolchain
+  CCACHE_DIR: ${{ github.workspace }}/.ccache
+  BUILD_DIR: ${{ github.workspace }}/build-riscv
+
 jobs:
-  check:
-    name: "Check"
-    runs-on: "ubuntu-latest"
-    strategy:
-      fail-fast: false
+  build:
+    runs-on: ubuntu-latest
+
     steps:
-    - uses: "actions/checkout@v3"
-      name: "Checkout"
-    - name: Install packages
-      run: sudo apt-get update && sudo apt -y install autoconf automake autotools-dev curl python3 libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build
-    - name: Clone RISCV toolchain
-      run: cd /home/runner/work && git clone https://github.com/riscv/riscv-gnu-toolchain
-    - name: Configure toolchain
-      run: cd /home/runner/work/riscv-gnu-toolchain && ./configure --prefix=/opt/riscv --with-arch=rv32gc --with-abi=ilp32d
-    - name: Install toolchain
-      run: cd /home/runner/work/riscv-gnu-toolchain && make linux
-    - name: Build project
-      run: cd /home/runner/work/smart-guard && cmake --build ./build --config Debug --target all --
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Checkout Pico SDK
+        uses: actions/checkout@v4
+        with:
+          repository: raspberrypi/pico-sdk
+          path: pico-sdk
+          submodules: recursive
+          fetch-depth: 1
+      - name: Free space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf automake autotools-dev curl python3 python3-pip python3-tomli \
+            libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex \
+            texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev \
+            ninja-build git cmake ccache libglib2.0-dev libslirp-dev libncurses-dev
+          sudo apt-get clean
+      - name: Cache toolchain
+        id: cache-toolchain
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TOOLCHAIN_DIR }}
+          key: rp2350-riscv-toolchain-v3
+
+      - name: Build RISC-V toolchain
+        if: steps.cache-toolchain.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "${TOOLCHAIN_DIR}"
+          git clone --depth 1 https://github.com/riscv-collab/riscv-gnu-toolchain gcc-src
+          cd gcc-src
+
+          ./configure \
+            --prefix="${TOOLCHAIN_DIR}" \
+            --with-arch=rv32imac_zicsr_zifencei_zba_zbb_zbs_zbkb \
+            --with-abi=ilp32 \
+            --with-languages=c,c++ \
+            --enable-strip
+
+          make -j2
+          cd ..
+          rm -rf gcc-src
+
+      - name: Add toolchain to PATH
+        run: |
+          echo "${TOOLCHAIN_DIR}/bin" >> "$GITHUB_PATH"
+          echo "PICO_TOOLCHAIN_PATH=${TOOLCHAIN_DIR}/bin" >> "$GITHUB_ENV"
+      - name: Verify toolchain
+        run: |
+          riscv32-unknown-elf-gcc --version
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ runner.os }}-ccache-rp2350-${{ hashFiles('**/*') }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-rp2350-
+      - name: Configure
+        run: |
+          cmake -S . -B "${BUILD_DIR}" -G Ninja \
+            -DPICO_BOARD="${PICO_BOARD}" \
+            -DPICO_PLATFORM="${PICO_PLATFORM}" \
+            -DPICO_SDK_PATH="${PICO_SDK_PATH}" \
+            -DPICO_TOOLCHAIN_PATH="${TOOLCHAIN_DIR}/bin" \
+            -DCMAKE_BUILD_TYPE=Debug
+      - name: Build
+        run: cmake --build "${BUILD_DIR}" --parallel
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pico2w-rp2350-riscv
+          path: |
+            build-riscv/**/*.uf2
+            build-riscv/**/*.elf
+            build-riscv/**/*.bin
+            build-riscv/**/*.map
+      - name: Debug space
+        if: failure()
+        run: |
+          df -h
+          du -h --max-depth=1 "$GITHUB_WORKSPACE" | sort -h
