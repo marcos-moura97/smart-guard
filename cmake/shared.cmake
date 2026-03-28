@@ -1,12 +1,12 @@
-if(EXISTS "${CMAKE_SOURCE_DIR}/cmake/config.cmake")
-    include("${CMAKE_SOURCE_DIR}/cmake/config.cmake")
+if(EXISTS "${PROJECT_ROOT}/cmake/config.cmake")
+    include("${PROJECT_ROOT}/cmake/config.cmake")
 else()
     message(WARNING 
         "Missing config.cmake\n"
         "Some variables can be missing. Create cmake/config.cmake from cmake/config.cmake.example"
     )
 endif()
-include("${CMAKE_SOURCE_DIR}/cmake/warnings.cmake")
+include("${PROJECT_ROOT}/cmake/warnings.cmake")
 
 macro(new_library LIBRARY_NAME SOURCE_DIR INCLUDE_DIR)
     file(GLOB_RECURSE SOURCES

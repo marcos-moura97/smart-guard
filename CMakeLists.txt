@@ -25,6 +25,12 @@ set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
 if (EXISTS ${picoVscode})
     include(${picoVscode})
 endif()
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../cmake/shared.cmake")
+    set(PROJECT_ROOT "${CMAKE_CURRENT_LIST_DIR}/..")
+else()
+    set(PROJECT_ROOT "${CMAKE_SOURCE_DIR}")
+endif()
 # ====================================================================================
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include("${CMAKE_SOURCE_DIR}/pico_sdk_import.cmake")
@@ -62,41 +68,3 @@ new_pico_program(${PROJECT_NAME} "smart_guard" "0.1")
 
 # Generate PIO header
 pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/smart_guard.pio)
-
-# ------------------------------------------------------------ CppUTest ----------------------------------------------------------------
-
-set(ENABLE_TESTS OFF)
-if(${ENABLE_TESTS})
-    set(TEST_NAME "smart_guard_test")
-    set(PICO_CXX_ENABLE_EXCEPTIONS 1)
-    set(CPPUTEST_MEM_LEAK_DETECTION_DISABLED 1) # causes compile errors in standard library, so disabling this for now.
-
-    # CppUTest
-    include(FetchContent)
-    FetchContent_Declare(
-        CppUTest
-        GIT_REPOSITORY https://github.com/cpputest/cpputest.git
-        GIT_TAG        master # or use release tag, eg. v4.0
-    )
-    # Set this to ON if you want to have the CppUTests in your project as well.
-    set(TESTS OFF CACHE BOOL "Switch off CppUTest Test build")
-    FetchContent_MakeAvailable(CppUTest)
-
-    new_tests(${TEST_NAME} src include test test.cpp)
-    target_link_pico_libraries(${TEST_NAME})
-    target_link_libraries(${TEST_NAME} PUBLIC
-        smart_guard_core
-        smart_guard_pico
-    )
-    new_pico_program(${TEST_NAME} ${TEST_NAME} "0.1")
-
-    # Pull in our pico_stdlib which pulls in commonly used features
-    target_link_libraries(${TEST_NAME} PRIVATE
-        CppUTest::CppUTest
-        CppUTest::CppUTestExt
-    )
-
-    target_compile_definitions(${TEST_NAME} PRIVATE
-        CPPUTEST_HAVE_EXCEPTIONS=1
-    )
-endif()
