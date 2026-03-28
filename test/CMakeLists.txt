@@ -18,7 +18,7 @@ else()
 endif()
 
 add_subdirectory(${PROJECT_ROOT}/lib/smart_guard_core
-                    ${PROJECT_ROOT}/smart_guard_core_build)
+                    ${PROJECT_ROOT}/build/test/smart_guard_core_build)
         
 
 include(FetchContent)
@@ -31,10 +31,13 @@ FetchContent_Declare(
 set(TESTS OFF CACHE BOOL "Disable CppUTest self-tests" FORCE)
 FetchContent_MakeAvailable(CppUTest)
 
+file(GLOB_RECURSE SOURCES
+    CONFIGURE_DEPENDS
+        *.cpp
+)
 add_executable(smart_guard_core_test
-    #${CMAKE_SOURCE_DIR}/../../test.cpp
-    it_works.cpp
     ${PROJECT_ROOT}/test.cpp
+    ${SOURCES}
 )
 
 target_link_libraries(smart_guard_core_test PRIVATE
