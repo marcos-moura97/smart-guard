@@ -45,8 +45,6 @@ TEST(FallDetector, TestCaseCleaning)
 {
     using namespace test_fall_detector;
 
-    return;
-
     TestCase::from_csv("cleaning.csv").test(
         [](const PacketData& output, const PacketData& log)
         {
