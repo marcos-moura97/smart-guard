@@ -20,6 +20,6 @@ namespace process
         Ping(std::function<void()> on_update = nullptr);
 
     protected:
-        virtual Update update(void) override;
+        virtual Update update(duration_t dt) override;
     };
 }

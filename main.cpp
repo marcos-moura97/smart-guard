@@ -61,7 +61,7 @@ int test_imu()
     
     while(true)
     {
-        auto [accel, gyro, temp] = imu.measure();
+        auto [accel, gyro, temp] = imu.read();
 
         auto [ax, ay, az] = accel;
         auto [gx, gy, gz] = gyro;
@@ -151,7 +151,7 @@ int test_wifi_w_imu(){
     while(true)
     {
         SensorData sensor_data = {};
-        sensor_data.imu = {imu.measure()};
+        sensor_data.imu = {imu.read()};
         Direction direction = {};
 
         //std::printf("[%f, %f, %f], [%f, %f, %f], %f\n", ax, ay, az, gx, gy, gz, temp);

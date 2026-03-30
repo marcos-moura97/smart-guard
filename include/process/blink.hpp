@@ -13,6 +13,6 @@ namespace process
         Blink(void);
 
     protected:
-        virtual Update update(void) override;
+        virtual Update update(duration_t dt) override;
     };
 }

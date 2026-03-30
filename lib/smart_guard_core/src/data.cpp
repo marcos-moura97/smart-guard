@@ -17,7 +17,8 @@ std::string PacketData::format_csv(void) const
 
     // print similar CSV as original
     return std::format(
-        "{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:d},{:d},{:d},{:d},{:d}",
+        "{:},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:d},{:d},{:d},{:d},{:d}",
+        this->delta_time.count(),
         ax_g,
         ay_g,
         az_g,
@@ -44,6 +45,7 @@ std::string PacketData::format_json() const
         buffer.data(),
         buffer.size(),
         "{"
+            "\"delta_time\": %li"
             "\"imu\":{"
                 "\"accel\":[%.3f,%.3f,%.3f],"
                 "\"gyro\":[%.3f,%.3f,%.3f]"
@@ -64,6 +66,7 @@ std::string PacketData::format_json() const
                 "\"fall_detected\":%d"
             "}"
         "}",
+        this->delta_time.count(),
         ax_g, ay_g, az_g,
         gx, gy, gz,
         this->direction.pitch,

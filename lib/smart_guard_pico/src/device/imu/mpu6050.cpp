@@ -21,7 +21,7 @@ Mpu6050::Mpu6050(std::shared_ptr<i2c_t> i2c, std::uint8_t addr, AccelRange accel
     this->set_accel_hpf(AccelHpf::Reset);
 }
 
-ImuDataRaw Mpu6050::measure_raw(void) const
+ImuDataRaw Mpu6050::read_raw(void)
 {
     if(!this->_i2c)
     {
@@ -81,9 +81,9 @@ ImuDataRaw Mpu6050::measure_raw(void) const
     return data;
 }
 
-ImuData Mpu6050::measure(void) const
+ImuData Mpu6050::read(void)
 {
-    ImuDataRaw raw {this->measure_raw()};
+    ImuDataRaw raw {this->read_raw()};
 
     return {
         .accel = this->accel_from_raw(raw.accel),

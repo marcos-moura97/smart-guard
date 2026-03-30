@@ -1,12 +1,13 @@
 #pragma once
 #include <cstdint>
+#include <device/input.hpp>
 #include <device/i2c.hpp>
 #include <data.hpp>
 #include <array>
 #include <memory>
 #include <numbers>
 
-class Mpu6050 final
+class Mpu6050 final : public Input<ImuData>
 {
 public:
     static constexpr std::uint8_t DEFAULT_SLAVE_ADDRESS {0x68};
@@ -75,9 +76,8 @@ public:
         GyroRange gyro_range
     );
 
-    ImuData measure(void) const;
-
-    ImuDataRaw measure_raw(void) const;
+    virtual ImuData read(void) override;
+    ImuDataRaw read_raw(void);
 
     void set_accel_range(AccelRange range);
     void set_accel_hpf(AccelHpf hpf);

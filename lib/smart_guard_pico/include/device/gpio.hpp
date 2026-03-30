@@ -2,6 +2,8 @@
 #include <cstdio>
 #include <hardware/gpio.h>
 #include <pico/types.h>
+#include <device/input.hpp>
+#include <device/output.hpp>
 
 #ifdef PICO_BOARD_PICO2_W
 #include <boards/pico2_w.h>
@@ -21,7 +23,7 @@ public:
 };
 
 template<uint PIN>
-class GpioOut : public Gpio<PIN>
+class GpioOut : public Gpio<PIN>, public Output<bool>
 {
 private:
     bool _on = false;
@@ -29,7 +31,7 @@ private:
 public:
     GpioOut(bool on = false);
 
-    void write(bool on);
+    virtual void write(bool on) override;
     void toggle(void);
 };
 
@@ -40,12 +42,12 @@ enum class GpioInMode
 };
 
 template<uint PIN, GpioInMode MODE>
-class GpioIn : public Gpio<PIN>
+class GpioIn : public Gpio<PIN>, public Input<bool>
 {
 public:
     GpioIn(void);
 
-    bool read(void) const;
+    virtual bool read(void) const override;
 };
 
 using BuiltinLed = GpioOut<

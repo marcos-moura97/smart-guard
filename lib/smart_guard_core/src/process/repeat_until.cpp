@@ -7,7 +7,7 @@ process::RepeatUntil::RepeatUntil(functor_t action) noexcept:
 
 }
 
-process::Update process::RepeatUntil::update(void)
+process::Update process::RepeatUntil::update(duration_t dt)
 {
-    return (this->_action)();
+    return (this->_action)(std::move(dt));
 }

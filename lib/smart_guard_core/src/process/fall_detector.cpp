@@ -1,37 +1,35 @@
 #include "connectivity/send.hpp"
-#include "device/imu/mpu6050.hpp"
 #include <cstdio>
 #include <data.hpp>
 #include <delta_time.hpp>
 #include <cassert>
 #include <chrono>
 #include <cmath>
-#include <hardware/gpio.h>
 #include <numbers>
 #include <optional>
-#include <pico/time.h>
-#include <pico/types.h>
 #include <process/fall_detector.hpp>
 
-process::FallDetector::FallDetector(GpioButton button, GpioEmergencyLed emergency_led, Mpu6050 imu, std::shared_ptr<Send<PacketData>> client):
+process::FallDetector::FallDetector(
+    std::unique_ptr<Input<bool>> button,
+    std::unique_ptr<Output<bool>> emergency_led,
+    std::unique_ptr<Input<ImuData>> imu,
+    std::shared_ptr<Send<PacketData>> client
+):
     _button(std::move(button)),
     _emergency_led(std::move(emergency_led)),
     _imu(std::move(imu)),
-    _client(std::move(client)),
-    _delta_time()
+    _client(std::move(client))
 {
     
 }
 
-process::Update process::FallDetector::update(void)
+process::Update process::FallDetector::update(duration_t dt)
 {
     const SensorData sensor_data {this->measure()};
-    
-    this->_delta_time.tick();
 
-    this->analyze(sensor_data);
+    this->analyze(sensor_data, dt);
 
-    const PacketData packet_data {this->collect(sensor_data)};
+    const PacketData packet_data {this->collect(sensor_data, dt)};
     this->_client->send(packet_data);
 
     const std::optional<bool> evaluation {this->evaluate(packet_data)};
@@ -42,7 +40,7 @@ process::Update process::FallDetector::update(void)
         {
             //printf("FINAL FALL DETECTED (STEP 1)\n");
             this->_fall_detected = true;
-            this->_emergency_led.write(false);
+            this->_emergency_led->write(false);
         }
         else
         {
@@ -60,14 +58,14 @@ process::Update process::FallDetector::update(void)
     // alert button handle check
     if(this->_fall_detected)
     {
-        if(!this->_button.read())
+        if(!this->_button->read())
         {
-            this->_emergency_led.write(false);
+            this->_emergency_led->write(false);
             this->_fall_detected = false;
         }
         else
         {
-            this->_emergency_led.write(true);
+            this->_emergency_led->write(true);
         }
     }
 
@@ -77,7 +75,7 @@ process::Update process::FallDetector::update(void)
 SensorData process::FallDetector::measure(void)
 {
     // Read from IMU
-    ImuData imu_dat {this->_imu.measure()};
+    ImuData imu_dat {this->_imu->read()};
 
     // Low pass on floating point values
     // NOTE: Previous implementation did this on the PCM values, so this implementation may lead to slightly different results.
@@ -95,7 +93,7 @@ SensorData process::FallDetector::measure(void)
 
 // Detects events related to fall detection
 // Pre-collection events
-void process::FallDetector::analyze(const SensorData& sensor_data)
+void process::FallDetector::analyze(const SensorData& sensor_data, duration_t dt)
 {
     const auto [ax_g, ay_g, az_g] = sensor_data.imu.accel;
     const auto [gx, gy, gz] = sensor_data.imu.gyro;
@@ -119,7 +117,7 @@ void process::FallDetector::analyze(const SensorData& sensor_data)
     }
     else
     {
-        this->_events.free_fall->elapsed += this->_delta_time.dt();
+        this->_events.free_fall->elapsed += dt;
         if(!this->_events.free_fall->is_free_fall && this->_events.free_fall->elapsed >= this->FREE_FALL_TRIGGER_TIME)
         {
             this->_events.free_fall->is_free_fall = true;
@@ -131,7 +129,7 @@ void process::FallDetector::analyze(const SensorData& sensor_data)
     const bool is_lying_now {std::abs(ax_g) < IS_LYING_THRESHOLD && std::abs(az_g) > IS_LYING_THRESHOLD};
     if(this->_events.impact.has_value())
     {
-        this->_events.impact->elapsed += this->_delta_time.dt();
+        this->_events.impact->elapsed += dt;
     }
     else if(mag_g > this->IMPACT_THRESHOLD)
     {
@@ -149,7 +147,7 @@ void process::FallDetector::analyze(const SensorData& sensor_data)
     // 5) POSTURE CHANGE within 500ms
     if(this->_events.tilt_change.has_value())
     {
-        this->_events.tilt_change->elapsed += this->_delta_time.dt();
+        this->_events.tilt_change->elapsed += dt;
         if(this->_events.tilt_change->elapsed <= this->TILT_WINDOW_TIME)
         {
             if(!this->_events.tilt_change->is_tilt_change && (is_lying_now != this->_events.tilt_change->was_lying_at_impact)) // TODO: Double check this logic
@@ -167,7 +165,7 @@ void process::FallDetector::analyze(const SensorData& sensor_data)
     // 6) ENTER POST-FALL MONITORING (2 of 3 events + lying)
     if (this->_events.post_fall.has_value())
     {
-        this->_events.post_fall->elapsed += this->_delta_time.dt();
+        this->_events.post_fall->elapsed += dt;
     }
     else
     {
@@ -215,7 +213,7 @@ std::optional<bool> process::FallDetector::evaluate(const PacketData& packet_dat
 }
 
 // Collects the data to be sent to the client / host
-PacketData process::FallDetector::collect(const SensorData& sensor_data)
+PacketData process::FallDetector::collect(const SensorData& sensor_data, duration_t dt)
 {
     const auto [ax_g, ay_g, az_g] = sensor_data.imu.accel;
     const auto [gx, gy, gz] = sensor_data.imu.gyro;
@@ -235,9 +233,10 @@ PacketData process::FallDetector::collect(const SensorData& sensor_data)
         .roll = std::atan2(ay_g, az_g) * DEG_PER_RAD
     };
 
-    const Direction direction_filtered {this->filter_direction(direction, sensor_data.imu)};
+    const Direction direction_filtered {this->filter_direction(direction, sensor_data.imu, dt)};
 
     return PacketData {
+        .delta_time {dt},
         .sensor_data {sensor_data},
         .direction {direction},
         .direction_filtered {direction_filtered},
@@ -251,7 +250,7 @@ PacketData process::FallDetector::collect(const SensorData& sensor_data)
 }
 
 // Applies a kalman filter to the pitch and roll
-Direction process::FallDetector::filter_direction(Direction direction, const ImuData& imu_data)
+Direction process::FallDetector::filter_direction(Direction direction, const ImuData& imu_data, duration_t dt)
 {
     static constexpr double KALMAN_TORQUE_SCALING {131.0}; // What does this number correspond to?
 
@@ -264,7 +263,7 @@ Direction process::FallDetector::filter_direction(Direction direction, const Imu
 
     const auto [gx, gy, gz] = imu_data.gyro;
 
-    /*const*/ double dt_seconds {std::chrono::duration_cast<std::chrono::duration<double>>(this->_delta_time.dt()).count()};
+    /*const*/ double dt_seconds {std::chrono::duration_cast<std::chrono::duration<double>>(dt).count()};
 
     // NOTE: I assume this helps with floating-point overflow/underflow, but wouldn't a std::clamp make more sense? Keeping it as is for now.
     if (dt_seconds <= 0.0 || dt_seconds > 0.1) dt_seconds = 0.02;

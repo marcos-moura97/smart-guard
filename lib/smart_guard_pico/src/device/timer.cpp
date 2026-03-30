@@ -1,30 +1,36 @@
+#include "delta_time.hpp"
+#include "process/process.hpp"
+#include <cassert>
 #include <device/timer.hpp>
 
 Timer::Timer(void) noexcept:
-    _process(nullptr),
+    _timer_data(nullptr),
     _timer(nullptr)
 {
     
 }
 Timer::Timer(Timer&& timer) noexcept:
-    _process(std::move(timer._process)),
+    _timer_data(std::move(timer._timer_data)),
     _timer(std::move(timer._timer))
 {
-    assert(!timer._process);
+    assert(!timer._timer_data);
     assert(!timer._timer);
 }
 
 Timer::Timer(std::unique_ptr<process::Process>&& process, microseconds_t delay):
-    _process(std::move(process)),
-    _timer(this->_process ? std::make_unique<repeating_timer_t>(repeating_timer_t(0)) : nullptr)
+    _timer_data(process ? std::make_unique<TimerData>(TimerData {
+        .delta_time {},
+        .process {std::move(process)}
+    }) : nullptr),
+    _timer(this->_timer_data ? std::make_unique<repeating_timer_t>(repeating_timer_t(0)) : nullptr)
 {
-    if(this->_process)
+    if(this->_timer_data && this->_timer_data->process)
     {
         assert(this->_timer);
         add_repeating_timer_us(
             delay.count(), // should convert into microseconds
             Timer::__process_update_timer_callback,
-            this->_process.get(),
+            this->_timer_data.get(),
             this->_timer.get()
         );
     }
@@ -55,7 +61,7 @@ Timer& Timer::operator=(Timer&& timer)
     {
         cancel_repeating_timer(this->_timer.get());
     }
-    this->_process = std::move(timer._process);
+    this->_timer_data = std::move(timer._timer_data);
     this->_timer = std::move(timer._timer);
     assert(!timer._process);
     assert(!timer._timer);
@@ -71,14 +77,16 @@ std::unique_ptr<process::Process> Timer::operator*(void) &&
         this->_timer = nullptr;
     }
 
-    std::unique_ptr<process::Process> process {std::move(this->_process)};
-    assert(!this->_process);
+    std::unique_ptr<process::Process> process {std::move(this->_timer_data->process)};
+    assert(!this->_timer_data->process);
+    this->_timer_data = nullptr;
+    assert(!this->_timer_data);
     assert(!this->_timer);
     
     return process;
 }
 
-Timer::microseconds_t Timer::delay(void) const
+Timer::microseconds_t Timer::get_delay(void) const
 {
     if(!this->_timer)
     {
@@ -107,15 +115,24 @@ bool Timer::__process_update_timer_callback(repeating_timer_t* timer)
     assert(timer);
     assert(timer->user_data);
 
-    void* process_untyped {timer->user_data};
-    process::Process* process {static_cast<process::Process*>(process_untyped)};
-    process::Update result {process->update()};
+    void* timer_data_untyped {timer->user_data};
+    TimerData* timer_data {static_cast<TimerData*>(timer_data_untyped)};
+    process::Process& process {*timer_data->process};
+    DeltaTime& delta_time {timer_data->delta_time};
+
+    process::Update result {process.update(delta_time.dt())};
+    delta_time.tick();
+    
     switch(result)
     {
         case process::Update::done:
+        {
             return false;
+        }
         case process::Update::pending:
+        {
             return true;
+        }
     }
     return false;
 }

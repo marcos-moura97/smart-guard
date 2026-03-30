@@ -1,4 +1,5 @@
 #pragma once
+#include "delta_time.hpp"
 #include <chrono>
 #include <concepts>
 #include <memory>
@@ -18,6 +19,12 @@ private:
     using microseconds_t = std::chrono::duration<std::uint64_t, std::micro>;
     static_assert(std::same_as<microseconds_t::rep, decltype(to_us_since_boot(get_absolute_time()))>, "Microsecond representation mismatch!");
 
+    struct TimerData
+    {
+        DeltaTime delta_time;
+        std::unique_ptr<process::Process> process;
+    };
+
 public:
     enum class Status
     {
@@ -27,7 +34,7 @@ public:
     };
 
 private:
-    std::unique_ptr<process::Process> _process;
+    std::unique_ptr<TimerData> _timer_data;
     std::unique_ptr<repeating_timer_t> _timer;
 
 
@@ -50,7 +57,7 @@ public:
 
     std::unique_ptr<process::Process> operator*(void) &&;
 
-    microseconds_t delay(void) const;
+    microseconds_t get_delay(void) const;
     Status status(void) const;
 
 private:

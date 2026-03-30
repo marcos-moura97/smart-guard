@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 namespace process
 {
     /**
@@ -19,8 +21,11 @@ namespace process
     class Process
     {
     public:
+        using duration_t = std::chrono::microseconds;
+
+    public:
         /// Action to be performed each tick by the Timer
-        virtual Update update(void) = 0;
+        virtual Update update(duration_t dt) = 0;
 
         virtual ~Process() = default;
     };

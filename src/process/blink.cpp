@@ -8,7 +8,7 @@ process::Blink::Blink(void):
     std::printf("Blink process started!");
 }
 
-process::Update process::Blink::update(void)
+process::Update process::Blink::update(duration_t dt)
 {
     this->_led.toggle();
 

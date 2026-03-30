@@ -8,7 +8,7 @@ namespace process
     class RepeatUntil : public Process
     {
     public:
-        using functor_t = std::function<Update()>;
+        using functor_t = std::function<Update(duration_t)>;
 
     private:
         functor_t _action;
@@ -16,6 +16,6 @@ namespace process
     public:
         RepeatUntil(functor_t action) noexcept;
 
-        virtual Update update(void) override;
+        virtual Update update(duration_t dt) override;
     };
 }

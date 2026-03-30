@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <chrono>
 #include <cstdint>
 #include <string>
 
@@ -40,6 +41,9 @@ struct PingData final
 // The data to be sent to the client or host system
 struct PacketData final
 {
+    using duration_t = std::chrono::microseconds;
+
+    duration_t delta_time;
     SensorData sensor_data;
     Direction direction;
     Direction direction_filtered;

@@ -1,18 +1,15 @@
 #pragma once
 #include "connectivity/send.hpp"
-#include "device/gpio.hpp"
-#include "device/imu/mpu6050.hpp"
+#include "device/input.hpp"
+#include "device/output.hpp"
 #include <cstdint>
 #include <process/process.hpp>
 #include <data.hpp>
 #include <array>
 #include <chrono>
 #include <optional>
-#include <pico/time.h>
-#include <pico/types.h>
 #include <dsp/fir_filter.hpp>
 #include <dsp/kalman.hpp>
-#include <device/gpio.hpp>
 #include <delta_time.hpp>
 
 namespace process
@@ -71,11 +68,10 @@ namespace process
             bool is_monitoring_post_fall(void) const;
         };
 
-        GpioButton _button;
-        GpioEmergencyLed _emergency_led;
-        Mpu6050 _imu;
+        std::unique_ptr<Input<bool>> _button;
+        std::unique_ptr<Output<bool>> _emergency_led;
+        std::unique_ptr<Input<ImuData>> _imu;
         std::shared_ptr<Send<PacketData>> _client;
-        DeltaTime _delta_time;
 
         // Events
         Events _events {};
@@ -98,11 +94,15 @@ namespace process
         //FallDetector(void) = delete;
         //FallDetector(const FallDetector&) = delete;
 
-        FallDetector(GpioButton button, GpioEmergencyLed emergency_led, Mpu6050 imu, std::shared_ptr<Send<PacketData>> client);
+        FallDetector(
+            std::unique_ptr<Input<bool>> button,
+            std::unique_ptr<Output<bool>> emergency_led,
+            std::unique_ptr<Input<ImuData>> imu,
+            std::shared_ptr<Send<PacketData>> client
+        );
 
-    protected:
         // The core algorithm for fall detection
-        virtual Update update(void) override;
+        virtual Update update(duration_t dt) override;
 
     private:
         // Measures sensor data
@@ -110,15 +110,15 @@ namespace process
 
         // Detects events related to fall detection
         // Pre-collection events
-        void analyze(const SensorData& sensor_data);
+        void analyze(const SensorData& sensor_data, duration_t dt);
 
         // Post-collection events
         std::optional<bool> evaluate(const PacketData& packet_data) const;
 
         // Collects the data to be sent to the client / host
-        PacketData collect(const SensorData& sensor_data);
+        PacketData collect(const SensorData& sensor_data, duration_t dt);
 
         // Applies a kalman filter to the pitch and roll
-        Direction filter_direction(Direction direction, const ImuData& imu_data);
+        Direction filter_direction(Direction direction, const ImuData& imu_data, duration_t dt);
     };
 }
