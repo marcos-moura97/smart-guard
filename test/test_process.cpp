@@ -2,6 +2,7 @@
 #include "CppUTest/UtestMacros.h"
 #include "process/process.hpp"
 #include "process/repeat_until.hpp"
+#include "delta_time.hpp"
 #include <cstdint>
 #include <limits>
 
@@ -18,7 +19,7 @@ TEST(Process, ItWorks)
 
     i_t n {0};
     process::RepeatUntil incrementor {
-        [&n]()
+        [&n](auto dt)
         {
             if(n == N)
             {
@@ -29,9 +30,12 @@ TEST(Process, ItWorks)
         }
     };
 
+    DeltaTime delta_time;
+
     i_t i {0};
-    while(incrementor.update() != process::Update::done)
+    while(incrementor.update(delta_time.dt()) != process::Update::done)
     {
+        delta_time.tick();
         ++i;
         CHECK_EQUAL(i, n);
     }
