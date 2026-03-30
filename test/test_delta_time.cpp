@@ -19,6 +19,8 @@ TEST(DeltaTime, ItWorks)
 {
     constexpr std::size_t TOTAL_STEPS {10};
     constexpr std::chrono::milliseconds DT_TARGET {1000};
+
+    /// It can miss the target time by this much
     constexpr std::chrono::milliseconds DT_MISS {200};
 
     DeltaTime delta_time;
