@@ -18,6 +18,8 @@ public:
     * @return Input value
     */
     virtual Data read(void) = 0;
+
+    virtual ~Input() = default;
 };
 
 template<typename Data>

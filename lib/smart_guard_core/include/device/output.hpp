@@ -18,6 +18,8 @@ public:
     * @param data Value to be written
     */
     virtual void write(Data data) = 0;
+
+    virtual ~Output() = default;
 };
 
 template<typename Data>

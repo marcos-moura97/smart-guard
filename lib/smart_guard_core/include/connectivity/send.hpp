@@ -20,6 +20,8 @@ public:
     * @return True if successful
     */
     virtual bool send(Data data) = 0;
+
+    virtual ~Send() = default;
 };
 
 template<typename Data>
