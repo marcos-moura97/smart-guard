@@ -14,7 +14,7 @@ TEST_GROUP(DeltaTime)
 
 };
 
-/// Tests wether or not the process class works at all
+/// Asserts that delta-time gives a value roughly corresponding to the sleep delay in the loop.
 TEST(DeltaTime, ItWorks)
 {
     constexpr std::size_t TOTAL_STEPS {10};
