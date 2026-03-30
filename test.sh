@@ -8,8 +8,8 @@ cmake -S test -B ./build/test
 cmake --build ./build/test --config Debug --target all --
 
 # Merge compile_commands.json
-if ls ./build/**/compile_commands.json &> /dev/null; then
-    jq -s add ./build/**/compile_commands.json > ./build/compile_commands.json
+if ls ./build/compile_commands_original.json ./build/**/*/compile_commands.json &> /dev/null; then
+    jq -s add ./build/compile_commands_original.json ./build/**/*/compile_commands.json > ./build/compile_commands.json
 fi
 
 # Run tests
