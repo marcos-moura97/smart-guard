@@ -1,6 +1,11 @@
+#include <cassert>
+#include <cstddef>
 #include <data.hpp>
 #include <cmath>
 #include <format>
+#include <iterator>
+#include <string>
+#include <vector>
 
 std::array<float, 2> ImuData::accel_angles(void) const
 {
@@ -32,6 +37,96 @@ std::string PacketData::format_csv(void) const
         this->in_post_fall_monitor,
         this->fall_detected
     );
+}
+
+std::vector<PacketData> PacketData::parse_csv(std::istream& input_stream)
+{
+    using istream_iter_t = std::istreambuf_iterator<char>;
+
+    static constexpr std::size_t EXPECTED_TOKEN_COUNT {13};
+
+    istream_iter_t iter {input_stream}, end {};
+    std::vector<PacketData> packets;
+    std::vector<std::string> tokens;
+    tokens.reserve(EXPECTED_TOKEN_COUNT);
+    for(;;)
+    {
+        bool done {!(iter != end)};
+        if(done || *iter == '\n')
+        {
+            if(!tokens.empty())
+            {
+                assert(tokens.size() == 13);
+
+                auto token_iter {tokens.begin()};
+                auto token_end {tokens.end()};
+
+                auto next_token {
+                    [&token_iter]()
+                    {
+                        assert(token_iter != token_end);
+                        return *token_iter++;
+                    }
+                };
+
+                PacketData packet {
+                    .delta_time {std::stol(next_token())},
+                    .sensor_data {
+                        .imu {
+                            .accel {
+                                std::stof(next_token()),
+                                std::stof(next_token()),
+                                std::stof(next_token())
+                            },
+                            // These are are omitted from the CSV representation sadly.
+                            // Setting to zero for now...
+                            // We might need a new data-set that also has the gyroscope data
+                            .gyro { 0.0, 0.0, 0.0 },
+
+                            // Unused, so setting to zero for now...
+                            .temp = 0.0
+                        }
+                    },
+                    .direction {
+                        .pitch = std::stof(next_token()),
+                        .roll = std::stof(next_token())
+                    },
+                    .direction_filtered {
+                        .pitch = std::stof(next_token()),
+                        .roll = std::stof(next_token())
+                    },
+                    .free_fall_event = std::stoi(next_token()) != 0,
+                    .impact_event = std::stoi(next_token()) != 0,
+                    .tilt_change_event = std::stoi(next_token()) != 0,
+                    .in_post_fall_monitor = std::stoi(next_token()) != 0,
+                    .fall_detected = std::stoi(next_token()) != 0
+                };
+
+                assert(token_iter == token_end);
+                tokens.clear();
+                packets.push_back(std::move(packet));
+            }
+
+            if(done)
+            {
+                break;
+            }
+        }
+        else if(*iter == ',')
+        {
+            tokens.push_back(std::string());
+        }
+        else
+        {
+            if(tokens.empty())
+            {
+                tokens.push_back(std::string());
+            }
+            tokens.back().push_back(*iter);
+        }
+        ++iter;
+    }
+    return packets;
 }
 
 std::string PacketData::format_json() const

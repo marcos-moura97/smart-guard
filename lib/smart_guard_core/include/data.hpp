@@ -55,4 +55,6 @@ struct PacketData final
 
     std::string format_csv(void) const;
     std::string format_json(void) const;
+
+    static std::vector<PacketData> parse_csv(std::istream& input_stream);
 };
