@@ -60,6 +60,11 @@ std::vector<PacketData> PacketData::parse_csv(std::istream& input_stream)
         {
             if(!tokens.empty())
             {
+                // Use legacy delta-time if missing for backwards compatability
+                if(tokens.size() == 12)
+                {
+                    tokens.insert(tokens.begin(), "0.02");
+                }
                 assert(tokens.size() == 13);
 
                 auto token_iter {tokens.begin()};
