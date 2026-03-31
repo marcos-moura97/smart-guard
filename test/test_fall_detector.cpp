@@ -5,6 +5,8 @@
 #include "device/input.hpp"
 #include "process/fall_detector.hpp"
 #include <chrono>
+#include <filesystem>
+#include <fstream>
 #include <functional>
 #include <memory>
 #include <vector>
@@ -21,16 +23,19 @@ namespace test_fall_detector
     private:
         using log_t = std::vector<PacketData>;
 
+        static constexpr std::string_view CASE_DATA_DIRECTORY {"../../test/data/cases"};
+
         log_t _log;
         
     public:
-        TestCase(void);
+        TestCase(void) = default;
+        explicit TestCase(log_t log);
 
         void test(
             std::function<void(const PacketData&, const PacketData&)> check_packet
         ) const;
 
-        static TestCase from_csv(std::string csv);
+        static TestCase from_csv(std::filesystem::path csv_filename);
     };
 }
 
@@ -59,9 +64,20 @@ TEST(FallDetector, TestCaseCleaning)
 
 // TODO: add more cases
 
-test_fall_detector::TestCase test_fall_detector::TestCase::from_csv(std::string csv)
+test_fall_detector::TestCase::TestCase(log_t log):
+    _log(std::move(log))
 {
-    FAIL("TODO!");
+
+}
+
+test_fall_detector::TestCase test_fall_detector::TestCase::from_csv(std::filesystem::path csv_filename)
+{
+    std::filesystem::path case_data_directory {CASE_DATA_DIRECTORY};
+    std::filesystem::path csv_path {case_data_directory / csv_filename};
+    std::ifstream file {csv_path, std::fstream::in};
+    CHECK_TRUE(file);
+
+    return TestCase(PacketData::parse_csv(file));
 }
 
 void test_fall_detector::TestCase::test(

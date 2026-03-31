@@ -45,14 +45,18 @@ std::vector<PacketData> PacketData::parse_csv(std::istream& input_stream)
 
     static constexpr std::size_t EXPECTED_TOKEN_COUNT {13};
 
-    istream_iter_t iter {input_stream}, end {};
     std::vector<PacketData> packets;
     std::vector<std::string> tokens;
     tokens.reserve(EXPECTED_TOKEN_COUNT);
     for(;;)
     {
-        bool done {!(iter != end)};
-        if(done || *iter == '\n')
+        bool done {!input_stream};
+        char c;
+        if(!done)
+        {
+            input_stream >> c;
+        }
+        if(done || c == '\n')
         {
             if(!tokens.empty())
             {
@@ -112,7 +116,7 @@ std::vector<PacketData> PacketData::parse_csv(std::istream& input_stream)
                 break;
             }
         }
-        else if(*iter == ',')
+        else if(c == ',')
         {
             tokens.push_back(std::string());
         }
@@ -122,9 +126,8 @@ std::vector<PacketData> PacketData::parse_csv(std::istream& input_stream)
             {
                 tokens.push_back(std::string());
             }
-            tokens.back().push_back(*iter);
+            tokens.back().push_back(c);
         }
-        ++iter;
     }
     return packets;
 }
