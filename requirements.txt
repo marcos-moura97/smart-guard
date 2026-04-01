@@ -2,3 +2,4 @@ matplotlib==3.8.0
 numpy
 pyserial==3.5
 paho-mqtt==2.1.0
+tensorflow==2.13.1

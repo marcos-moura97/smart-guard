@@ -4,7 +4,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.animation as animation
 import numpy as np
 from datetime import datetime
-from typing import Union
+from typing import Union, Optional
 
 import threading
 import queue
@@ -13,12 +13,13 @@ import time
 from .serial_handler import SerialHandler
 from .data_handler import DataHandler
 from .mqtt_handler import MQTTHandler
-
+from .model_handler import FallModelHandler
 
 class GraphicalInterface:
-    def __init__(self, connection_handler: Union[SerialHandler, MQTTHandler], data_handler: DataHandler):
+    def __init__(self, connection_handler: Union[SerialHandler, MQTTHandler], data_handler: DataHandler, model_handler: Optional[FallModelHandler] = None):
         self.connection_handler = connection_handler
         self.data_handler = data_handler
+        self.model_handler = model_handler
 
         self.root = tk.Tk()
         self.root.title("SmartGuard HMI")
@@ -76,7 +77,8 @@ class GraphicalInterface:
             "Post-Fall Monitor",
             "Fall Detected"
         ]
-
+        if self.model_handler:
+            self.event_names.append("ML Fall Detected")
         self.event_labels = []
         for name in self.event_names:
             frame = tk.Frame(self.right_frame)
@@ -135,6 +137,9 @@ class GraphicalInterface:
             try:
                 line = self.data_queue.get_nowait()
                 self.data_handler.update_data(line)
+                if self.model_handler:
+                    ml_detected, ml_proba = self.model_handler.predict(self.data_handler)
+                    self.update_event_label("ML Fall Detected", f"{ml_detected} w/ conf: {ml_proba}")
             except queue.Empty:
                 break
 
