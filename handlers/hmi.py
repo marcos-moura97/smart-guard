@@ -139,6 +139,8 @@ class GraphicalInterface:
                 self.data_handler.update_data(line)
                 if self.model_handler:
                     ml_detected, ml_proba = self.model_handler.predict(self.data_handler)
+                    if ml_detected:
+                        self.connection_handler.publish_res(ml_detected, ml_proba)                      
                     self.update_event_label("ML Fall Detected", f"{ml_detected} w/ conf: {ml_proba}")
             except queue.Empty:
                 break

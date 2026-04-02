@@ -1,15 +1,18 @@
 import json
 import queue
 import paho.mqtt.client as mqtt
+from typing import Optional
 
 class MQTTHandler:
     def __init__(
         self,
         broker: str = "localhost",
         port: int = 1883,
-        topic: str = "/ping"
+        sub_topic: str = "/ping",        
+        pub_topic: Optional[str] = None
     ):
-        self.topic = topic
+        self.sub_topic = sub_topic
+        self.pub_topic = pub_topic
         self.connected = False
 
         self.last_line = None
@@ -26,15 +29,13 @@ class MQTTHandler:
     def read_line(self):
         return self.last_line
 
-
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
             self.connected = True
             print("MQTT connected.")
-            client.subscribe(self.topic)
+            client.subscribe(self.sub_topic)
         else:
             print(f"MQTT connection failed: {rc}")
-
 
     def on_message(self, client, userdata, msg):
         try:
@@ -80,3 +81,11 @@ class MQTTHandler:
             return self.queue.get_nowait()
         except queue.Empty:
             return ""
+
+    def publish_res(self, detected: bool, prob: float) -> None:
+        if self.pub_topic is not None:
+            payload = {
+                    "detected": detected,
+                    "probability": prob
+                }
+            self.client.publish(self.pub_topic, payload=json.dumps(payload), qos=1)
