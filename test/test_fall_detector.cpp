@@ -43,8 +43,6 @@ namespace test_fall_detector
 Cleaning test case.
 
 TODO: describe test case more precisely
-
-Shouldn't trigger any flags. Right? We're gonna check anyways
 */
 TEST(FallDetector, TestCaseCleaning)
 {
@@ -56,6 +54,127 @@ TEST(FallDetector, TestCaseCleaning)
             CHECK_FALSE(output.fall_detected);
             CHECK_FALSE(output.free_fall_event);
             CHECK_FALSE(output.impact_event);
+            CHECK_FALSE(output.in_post_fall_monitor);
+            CHECK_FALSE(output.tilt_change_event);
+        }
+    );
+}
+
+/**
+Walking test case.
+
+*/
+
+TEST(FallDetector, TestCaseWalking)
+{
+    using namespace test_fall_detector;
+
+    TestCase::from_csv("walking.csv").test(
+        [](const PacketData& output, const PacketData& log)
+        {
+            CHECK_FALSE(output.fall_detected);
+            CHECK_FALSE(output.free_fall_event);
+            CHECK_FALSE(output.impact_event);
+            CHECK_FALSE(output.in_post_fall_monitor);
+            CHECK_FALSE(output.tilt_change_event);
+        }
+    );
+}
+
+/**
+Playing with Aspira test case.
+
+*/
+TEST(FallDetector, TestCasePlayingWithDog)
+{
+    using namespace test_fall_detector;
+
+    TestCase::from_csv("playing_with_dog.csv").test(
+        [](const PacketData& output, const PacketData& log)
+        {
+            CHECK_FALSE(output.fall_detected);
+            CHECK_FALSE(output.free_fall_event);
+            CHECK_FALSE(output.impact_event);
+            CHECK_FALSE(output.in_post_fall_monitor);
+            CHECK_FALSE(output.tilt_change_event);
+        }
+    );
+}
+
+/**
+Running test case.
+
+*/
+TEST(FallDetector, TestCaseRunning)
+{
+    using namespace test_fall_detector;
+
+    TestCase::from_csv("running.csv").test(
+        [](const PacketData& output, const PacketData& log)
+        {
+            CHECK_FALSE(output.fall_detected);
+            CHECK_FALSE(output.free_fall_event);
+            CHECK_TRUE(output.impact_event);
+            CHECK_FALSE(output.in_post_fall_monitor);
+            CHECK_FALSE(output.tilt_change_event);
+        }
+    );
+}
+
+/**
+Jumping test case.
+
+*/
+TEST(FallDetector, TestCaseJumping)
+{
+    using namespace test_fall_detector;
+
+    TestCase::from_csv("jumping.csv").test(
+        [](const PacketData& output, const PacketData& log)
+        {
+            CHECK_FALSE(output.fall_detected);
+            CHECK_TRUE(output.free_fall_event);
+            CHECK_TRUE(output.impact_event);
+            CHECK_FALSE(output.in_post_fall_monitor);
+            CHECK_FALSE(output.tilt_change_event);
+        }
+    );
+}
+
+/**
+Lying down test case.
+
+*/
+TEST(FallDetector, TestCaseLyingDown)
+{
+    using namespace test_fall_detector;
+
+    TestCase::from_csv("jumping.csv").test(
+        [](const PacketData& output, const PacketData& log)
+        {
+            CHECK_FALSE(output.fall_detected);
+            CHECK_FALSE(output.free_fall_event);
+            CHECK_FALSE(output.impact_event);
+            CHECK_FALSE(output.in_post_fall_monitor);
+            CHECK_FALSE(output.tilt_change_event);
+        }
+    );
+}
+
+/**
+Side Fall test case.
+
+*/
+TEST(FallDetector, TestCaseSideFall)
+{
+    using namespace test_fall_detector;
+
+    TestCase::from_csv("test_fall_pitch_2.csv").test(
+        [](const PacketData& output, const PacketData& log)
+        {
+            CHECK_TRUE(output.fall_detected);
+            CHECK_TRUE(output.free_fall_event);
+            CHECK_TRUE(output.impact_event);
             CHECK_FALSE(output.in_post_fall_monitor);
             CHECK_FALSE(output.tilt_change_event);
         }
