@@ -34,7 +34,7 @@ int main()
     //Mpu6050 imu(i2c, Mpu6050::DEFAULT_SLAVE_ADDRESS, Mpu6050::AccelRange::G2, Mpu6050::GyroRange::D250);
 
     Timer blink(
-        Blink(),
+        process::Blink(),
         std::chrono::seconds(1) // 1 Hz
     );
 
@@ -48,7 +48,7 @@ int main()
         sleep_ms(1000);
     }
     
-    return 0; 
+    return 0;
 }
 
 int test_imu()
@@ -61,7 +61,7 @@ int test_imu()
     
     while(true)
     {
-        auto [accel, gyro, temp] = imu.measure();
+        auto [accel, gyro, temp] = imu.read();
 
         auto [ax, ay, az] = accel;
         auto [gx, gy, gz] = gyro;
@@ -106,7 +106,7 @@ int test_wifi()
     }
 
     Timer ping(
-        Ping([&mqtt]() { mqtt.send(PingData()); }),
+        process::Ping([&mqtt]() { mqtt.send(PingData()); }),
         std::chrono::seconds(1)
     );
 
@@ -151,7 +151,7 @@ int test_wifi_w_imu(){
     while(true)
     {
         SensorData sensor_data = {};
-        sensor_data.imu = {imu.measure()};
+        sensor_data.imu = {imu.read()};
         Direction direction = {};
 
         //std::printf("[%f, %f, %f], [%f, %f, %f], %f\n", ax, ay, az, gx, gy, gz, temp);

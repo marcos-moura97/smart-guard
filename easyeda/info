@@ -1,0 +1,500 @@
+{
+  "uuid": "743f3ba431803406cdf7a1409c370618",
+  "path": "Offline/Smartguard",
+  "name": "Smartguard",
+  "content": "",
+  "created_at": "2026-04-22 09:01:57",
+  "updated_at": "2026-04-23 23:41:31",
+  "stick": "",
+  "documents": [
+    {
+      "uuid": "1474ecc63c2bfcb113973e887166adb5",
+      "title": "Sheet_1",
+      "description": "",
+      "docType": "1",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "3d4d5a6d7dfc49baa8eff833db5bfa59": 1,
+        "a28d099ba8674392bd7c606552dadbb7": 1,
+        "38eed23fc7054d1ab9fd741220f27fb5": 8,
+        "84637e843f7a4e188bc3a3c21a312ed8": 3,
+        "d5355da4da274b4293fc3814b59c565f": 1,
+        "2ad6f06aa0fe499689c95d07a97acff0": 1,
+        "7ec6184175344a2094a139dbc983bb03": 1,
+        "2d9e5dd028e54220b520b9ff3d8bbe00": 2,
+        "389f81e8737241d3a862cbd1039094b4": 1,
+        "a18f6258e5044e9fbcd01c32c20ec5e9": 1,
+        "d216a1b546d94e57a85908bdff5a9da1": 1,
+        "c771faef50ef474492ded078b08ba51b": 1,
+        "1668f2af11e14f98bdd13c0da1d37041": 2
+      },
+      "BOM": [
+        [
+          "Value",
+          "Quantity",
+          "Package",
+          "Components",
+          "CustomPara"
+        ],
+        [
+          "Jumper",
+          2,
+          "JUMPER WIRE",
+          "BAT1+,BAT1-",
+          {
+            "Manufacturer Part": "NONE",
+            "Manufacturer": "NONE",
+            "Supplier": "",
+            "Supplier Part": "NONE"
+          }
+        ],
+        [
+          "TL1100DF160Q",
+          1,
+          "KEY-TH_4P-L11.7-W11.5-P5.00-LS12.5",
+          "BUTTON1",
+          {
+            "Manufacturer Part": "TL1100DF160Q",
+            "Manufacturer": "E-Switch",
+            "Supplier": "LCSC",
+            "Supplier Part": "C273460"
+          }
+        ],
+        [
+          "100pF",
+          3,
+          "CAP-TH_L6.0-W3.5-P7.50-D1.0",
+          "C1,C2,C3",
+          {
+            "Manufacturer Part": "C07F1E152MN0B0S0N0",
+            "Manufacturer": "STE(松田)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C366311"
+          }
+        ],
+        [
+          "1N5819",
+          1,
+          "DO-41_BD2.4-L4.7-P8.70-D0.9-FD",
+          "D1",
+          {
+            "Manufacturer Part": "1N5819",
+            "Manufacturer": "ST(意法半导体)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C110032"
+          }
+        ],
+        [
+          "DY-334UWC-26K",
+          1,
+          "LED-TH_BD5.0-P2.54-FD",
+          "LED1",
+          {
+            "Manufacturer Part": "DY-334UWC-26K",
+            "Manufacturer": "TONYU(东裕)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C7433012"
+          }
+        ],
+        [
+          "JST-PH6",
+          2,
+          "JST-PH6",
+          "P1A,P1B",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "JST-PH3",
+          1,
+          "JST-PH3",
+          "P2",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "DMG2305UX",
+          1,
+          "SOT-23-3_L2.9-W1.3-P0.95-LS2.4-BR-1",
+          "Q1",
+          {
+            "Manufacturer Part": "DMG2305UX",
+            "Manufacturer": "TECH PUBLIC(台舟)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C2940629"
+          }
+        ],
+        [
+          "3kΩ",
+          1,
+          "RES-TH_BD2.7-L6.2-P10.20-D0.4",
+          "R1",
+          {
+            "Manufacturer Part": "CR1/4W-3K9±5%-ST52",
+            "Manufacturer": "VO(翔胜)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C2894697"
+          }
+        ],
+        [
+          "220Ω",
+          1,
+          "RES-TH_BD2.7-L6.2-P10.20-D0.4",
+          "R2",
+          {
+            "Manufacturer Part": "CR1/4W-3K9±5%-ST52",
+            "Manufacturer": "VO(翔胜)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C2894697"
+          }
+        ],
+        [
+          "10kΩ",
+          2,
+          "RES-TH_BD2.7-L6.2-P10.20-D0.4",
+          "R3,R6",
+          {
+            "Manufacturer Part": "CR1/4W-3K9±5%-ST52",
+            "Manufacturer": "VO(翔胜)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C2894697"
+          }
+        ],
+        [
+          "1kΩ",
+          2,
+          "RES-TH_BD2.7-L6.2-P10.20-D0.4",
+          "R4,R5",
+          {
+            "Manufacturer Part": "CR1/4W-3K9±5%-ST52",
+            "Manufacturer": "VO(翔胜)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C2894697"
+          }
+        ],
+        [
+          "20kΩ",
+          2,
+          "RES-TH_BD2.7-L6.2-P10.20-D0.4",
+          "R7,R8",
+          {
+            "Manufacturer Part": "CR1/4W-3K9±5%-ST52",
+            "Manufacturer": "VO(翔胜)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C2894697"
+          }
+        ],
+        [
+          "RASPBERRY PI PICO 2W",
+          1,
+          "COMM-TH_L51.0-W21.0-P2.54_PICOW",
+          "U1",
+          {
+            "Manufacturer Part": "Raspberry Pi Pico 2W",
+            "Manufacturer": "Raspberry Pi(树莓派)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C42394205"
+          }
+        ],
+        [
+          "MPU6050-TH",
+          1,
+          "COMM-TH_MPU6050-TH",
+          "U2",
+          {
+            "Manufacturer Part": "MPU6050-TH",
+            "Manufacturer": "null",
+            "Supplier": "LCSC",
+            "Supplier Part": "C9900132629"
+          }
+        ],
+        [
+          "HW-107",
+          1,
+          "HW-107-LIION-CHANGER",
+          "U3",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "TL071CP(LX)",
+          1,
+          "DIP-8_L9.2-W6.4-P2.54-LS7.6-BL",
+          "U4",
+          {
+            "Manufacturer Part": "TL071CP(LX)",
+            "Manufacturer": "LX(灵星芯微)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C52097819"
+          }
+        ]
+      ],
+      "updateTime": 1776927949,
+      "createTime": 1776841318,
+      "histories": [],
+      "created_at": "2026-04-22 09:01:58",
+      "updated_at": "2026-04-23 09:05:49"
+    },
+    {
+      "uuid": "a09d4a3da29627c2bb0a48575bf17264",
+      "puuid": "743f3ba431803406cdf7a1409c370618",
+      "title": "PCB_Smartguard_2",
+      "filename": "PCB_Smartguard_2.json",
+      "description": "",
+      "docType": "3",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "33c7d4e297c64965a610daedd621c84f": 2,
+        "97650d49fe7d4eafb4d65670dc8b1aad": 1,
+        "e7e0a2d4c54544d68b16d4578c167a96": 3,
+        "f9b6c4acbda64b569861a21e133c291c": 1,
+        "06b5cd08f3384a54acbf965c7106184b": 1,
+        "16a9da3c147a48c2ace46d8fc3bd0d39": 2,
+        "192e52ca34a44ba78dc338d91024c7c1": 1,
+        "48f726f118674c1c98ad35c23ffe8764": 1,
+        "02e9a7a961db4476b473a93445dcc24e": 8,
+        "7b762a35ac2e4da180c87519eaa8ce24": 1,
+        "7b0fb6366b5e4c23a3230d3dd427ee6d": 1,
+        "d568a137d4524bc29fe7514dc1efce06": 1,
+        "010a106df98d4f29938d761fdb2a40e3": 1
+      },
+      "BOM": [
+        [
+          "Value",
+          "Quantity",
+          "Package",
+          "Components",
+          "CustomPara"
+        ],
+        [
+          "Jumper",
+          2,
+          "JUMPER WIRE",
+          "BAT1+,BAT1-",
+          {
+            "Manufacturer Part": "NONE",
+            "Manufacturer": "NONE",
+            "Supplier": "",
+            "Supplier Part": "NONE"
+          }
+        ],
+        [
+          "TL1100DF160Q",
+          1,
+          "KEY-TH_4P-L11.7-W11.5-P5.00-LS12.5",
+          "BUTTON1",
+          {
+            "Manufacturer Part": "TL1100DF160Q",
+            "Manufacturer": "E-Switch",
+            "Supplier": "LCSC",
+            "Supplier Part": "C273460"
+          }
+        ],
+        [
+          "100pF",
+          3,
+          "CAP-TH_L6.0-W3.5-P7.50-D1.0",
+          "C1,C2,C3",
+          {
+            "Manufacturer Part": "C07F1E152MN0B0S0N0",
+            "Manufacturer": "STE(松田)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C366311"
+          }
+        ],
+        [
+          "1N5819",
+          1,
+          "DO-41_BD2.4-L4.7-P8.70-D0.9-FD",
+          "D1",
+          {
+            "Manufacturer Part": "1N5819",
+            "Manufacturer": "ST(意法半导体)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C110032"
+          }
+        ],
+        [
+          "DY-334UWC-26K",
+          1,
+          "LED-TH_BD5.0-P2.54-FD",
+          "LED1",
+          {
+            "Manufacturer Part": "DY-334UWC-26K",
+            "Manufacturer": "TONYU(东裕)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C7433012"
+          }
+        ],
+        [
+          "JST-PH6",
+          2,
+          "JST-PH6",
+          "P1A,P1B",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "JST-PH3",
+          1,
+          "JST-PH3",
+          "P2",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "DMG2305UX",
+          1,
+          "SOT-23-3_L2.9-W1.3-P0.95-LS2.4-BR-1",
+          "Q1",
+          {
+            "Manufacturer Part": "DMG2305UX",
+            "Manufacturer": "TECH PUBLIC(台舟)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C2940629"
+          }
+        ],
+        [
+          "3kΩ",
+          1,
+          "RES-TH_BD2.7-L6.2-P10.20-D0.4",
+          "R1",
+          {
+            "Manufacturer Part": "CR1/4W-3K9±5%-ST52",
+            "Manufacturer": "VO(翔胜)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C2894697"
+          }
+        ],
+        [
+          "220Ω",
+          1,
+          "RES-TH_BD2.7-L6.2-P10.20-D0.4",
+          "R2",
+          {
+            "Manufacturer Part": "CR1/4W-3K9±5%-ST52",
+            "Manufacturer": "VO(翔胜)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C2894697"
+          }
+        ],
+        [
+          "10kΩ",
+          2,
+          "RES-TH_BD2.7-L6.2-P10.20-D0.4",
+          "R3,R6",
+          {
+            "Manufacturer Part": "CR1/4W-3K9±5%-ST52",
+            "Manufacturer": "VO(翔胜)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C2894697"
+          }
+        ],
+        [
+          "1kΩ",
+          2,
+          "RES-TH_BD2.7-L6.2-P10.20-D0.4",
+          "R4,R5",
+          {
+            "Manufacturer Part": "CR1/4W-3K9±5%-ST52",
+            "Manufacturer": "VO(翔胜)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C2894697"
+          }
+        ],
+        [
+          "20kΩ",
+          2,
+          "RES-TH_BD2.7-L6.2-P10.20-D0.4",
+          "R7,R8",
+          {
+            "Manufacturer Part": "CR1/4W-3K9±5%-ST52",
+            "Manufacturer": "VO(翔胜)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C2894697"
+          }
+        ],
+        [
+          "RASPBERRY PI PICO 2W",
+          1,
+          "COMM-TH_L51.0-W21.0-P2.54_PICOW",
+          "U1",
+          {
+            "Manufacturer Part": "Raspberry Pi Pico 2W",
+            "Manufacturer": "Raspberry Pi(树莓派)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C42394205"
+          }
+        ],
+        [
+          "MPU6050-TH",
+          1,
+          "COMM-TH_MPU6050-TH",
+          "U2",
+          {
+            "Manufacturer Part": "MPU6050-TH",
+            "Manufacturer": "null",
+            "Supplier": "LCSC",
+            "Supplier Part": "C9900132629"
+          }
+        ],
+        [
+          "HW-107",
+          1,
+          "HW-107-LIION-CHANGER",
+          "U3",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "TL071CP(LX)",
+          1,
+          "DIP-8_L9.2-W6.4-P2.54-LS7.6-BL",
+          "U4",
+          {
+            "Manufacturer Part": "TL071CP(LX)",
+            "Manufacturer": "LX(灵星芯微)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C52097819"
+          }
+        ]
+      ],
+      "updateTime": 1776925313,
+      "createTime": 1776922519,
+      "histories": [],
+      "created_at": "2026-04-23 07:35:19",
+      "updated_at": "2026-04-23 08:21:53"
+    }
+  ],
+  "sort": [],
+  "title": "Smartguard",
+  "foldername": "Smartguard",
+  "schfilename": "Smartguard.json",
+  "schfilemtime": 1776927949130
+}
