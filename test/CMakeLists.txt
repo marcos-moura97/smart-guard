@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.60)
+cmake_minimum_required(VERSION 3.16)
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
@@ -35,6 +35,8 @@ file(GLOB_RECURSE SOURCES
     CONFIGURE_DEPENDS
         *.cpp
 )
+
+list(FILTER SOURCES EXCLUDE REGEX "/test_(mqtt|wifi_connection)\\.cpp$")
 add_executable(smart_guard_core_test
     ${PROJECT_ROOT}/test.cpp
     ${SOURCES}

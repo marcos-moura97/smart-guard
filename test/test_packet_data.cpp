@@ -13,7 +13,7 @@ TEST(PacketData, SerdeCSV)
 {
     // This might not be a plausible scenario. I just set random values here.
     const PacketData packet_lhs {
-        .delta_time {1},
+        .delta_time {PacketData::duration_t(1)},
         .sensor_data {
             .imu {
                 .accel {
