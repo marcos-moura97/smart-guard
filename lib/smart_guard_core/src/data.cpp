@@ -71,7 +71,7 @@ std::vector<PacketData> PacketData::parse_csv(std::istream& input_stream)
                 auto token_end {tokens.end()};
 
                 auto next_token {
-                    [&token_iter]()
+                    [&token_iter, &token_end]()
                     {
                         assert(token_iter != token_end);
                         return *token_iter++;
@@ -79,7 +79,7 @@ std::vector<PacketData> PacketData::parse_csv(std::istream& input_stream)
                 };
 
                 PacketData packet {
-                    .delta_time {std::stol(next_token())},
+                    .delta_time {duration_t(std::stol(next_token()))},
                     .sensor_data {
                         .imu {
                             .accel {

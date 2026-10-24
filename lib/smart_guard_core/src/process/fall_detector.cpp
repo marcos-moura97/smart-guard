@@ -48,11 +48,7 @@ process::Update process::FallDetector::update(duration_t dt)
         }
 
         // Reset state
-        this->_events = {
-            .free_fall {std::nullopt},
-            .impact {std::nullopt},
-            .post_fall {std::nullopt}
-        };
+        this->_events = {};
     }
 
     // alert button handle check
@@ -101,8 +97,20 @@ void process::FallDetector::analyze(const SensorData& sensor_data, duration_t dt
         std::sqrt(ax_g*ax_g + ay_g*ay_g + az_g*az_g)
     };
 
+    // Events are kept while monitoring post-fall, until the fall has been evaluated
+    const bool may_expire {!this->_events.is_monitoring_post_fall()};
+
     // 3) FREE-FALL detection
-    if (!(mag_g < 0.4f))
+    if(this->_events.is_free_fall())
+    {
+        // Event stays latched, so it can be combined with the impact that follows
+        this->_events.free_fall->elapsed += dt;
+        if(may_expire && this->_events.free_fall->elapsed >= this->EVENT_TIMEOUT_TIME)
+        {
+            this->_events.free_fall = std::nullopt;
+        }
+    }
+    else if (!(mag_g < 0.4f))
     {
         // Reset free fall counter
         this->_events.free_fall = std::nullopt;
@@ -118,18 +126,27 @@ void process::FallDetector::analyze(const SensorData& sensor_data, duration_t dt
     else
     {
         this->_events.free_fall->elapsed += dt;
-        if(!this->_events.free_fall->is_free_fall && this->_events.free_fall->elapsed >= this->FREE_FALL_TRIGGER_TIME)
+        if(this->_events.free_fall->elapsed >= this->FREE_FALL_TRIGGER_TIME)
         {
-            this->_events.free_fall->is_free_fall = true;
+            // Restart the counter to time the event's expiry
+            this->_events.free_fall = {
+                .elapsed {microseconds_t::zero()},
+                .is_free_fall = true
+            };
             std::printf("Event: FREE FALL\n");
         }
     }
 
     // 4) IMPACT detection
-    const bool is_lying_now {std::abs(ax_g) < IS_LYING_THRESHOLD && std::abs(az_g) > IS_LYING_THRESHOLD};
+    const bool is_lying_now {std::abs(az_g) < IS_LYING_THRESHOLD && std::abs(ax_g) > IS_LYING_THRESHOLD};
     if(this->_events.impact.has_value())
     {
         this->_events.impact->elapsed += dt;
+        if(may_expire && this->_events.impact->elapsed >= this->EVENT_TIMEOUT_TIME)
+        {
+            this->_events.impact = std::nullopt;
+            this->_events.tilt_change = std::nullopt;
+        }
     }
     else if(mag_g > this->IMPACT_THRESHOLD)
     {
@@ -139,7 +156,7 @@ void process::FallDetector::analyze(const SensorData& sensor_data, duration_t dt
         this->_events.tilt_change = {
             .elapsed {microseconds_t::zero()},
             .was_lying_at_impact = is_lying_now,
-            .is_tilt_change = this->_events.tilt_change.has_value() && this->_events.tilt_change->is_tilt_change
+            .is_tilt_change = false
         };
         std::printf("Event: IMPACT  mag=%.2f\n", mag_g);
     }
@@ -147,19 +164,15 @@ void process::FallDetector::analyze(const SensorData& sensor_data, duration_t dt
     // 5) POSTURE CHANGE within 500ms
     if(this->_events.tilt_change.has_value())
     {
-        this->_events.tilt_change->elapsed += dt;
-        if(this->_events.tilt_change->elapsed <= this->TILT_WINDOW_TIME)
+        // Only look for a change within the window, but keep the event once it has happened
+        if(this->_events.tilt_change->elapsed <= this->TILT_WINDOW_TIME
+            && !this->_events.tilt_change->is_tilt_change
+            && is_lying_now != this->_events.tilt_change->was_lying_at_impact)
         {
-            if(!this->_events.tilt_change->is_tilt_change && (is_lying_now != this->_events.tilt_change->was_lying_at_impact)) // TODO: Double check this logic
-            {
-                this->_events.tilt_change->is_tilt_change = true;
-                std::printf("Event: POSTURE CHANGE\n");
-            }
-            else
-            {
-                this->_events.tilt_change = std::nullopt;
-            }
+            this->_events.tilt_change->is_tilt_change = true;
+            std::printf("Event: POSTURE CHANGE\n");
         }
+        this->_events.tilt_change->elapsed += dt;
     }
 
     // 6) ENTER POST-FALL MONITORING (2 of 3 events + lying)
