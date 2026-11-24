@@ -12,21 +12,16 @@ class DataHandler:
         self.env_values = np.zeros((12, max_samples))
 
     def shift_left(self):
-        """Shift all samples left by one (FIFO buffer)."""
         self.env_values[:, :-1] = self.env_values[:, 1:]
 
     def update_data(self, line: str) -> None:
-        # Expect comma-separated values
         parts = line.strip().split(",")
 
         if len(parts) != 12:
-            # Invalid line, ignore
             return
 
-        # Convert to float (even booleans 0/1)
         new_values = np.array([float(v) for v in parts])
 
-        # First samples fill normally
         if self.actual_sample < self.max_samples:
             self.env_values[:, self.actual_sample] = new_values
 
@@ -36,7 +31,6 @@ class DataHandler:
             self.actual_sample += 1
 
         else:
-            # Buffer full → shift left and insert at end
             self.shift_left()
             self.env_values[:, -1] = new_values
             self.has_data = True

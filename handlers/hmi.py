@@ -1,4 +1,6 @@
+import csv
 import tkinter as tk
+from tkinter import filedialog, messagebox
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.animation as animation
@@ -12,7 +14,12 @@ import time
 
 from .serial_handler import SerialHandler
 from .data_handler import DataHandler
-from .mqtt_handler import MQTTHandler
+from .mqtt_handler import MQTTHandler, CRITICAL_FLAGS
+
+CRITICAL_HOLD_S = 1.0
+EVENT_LOG_LINES = 14
+
+STREAM_LOG_FLAGS = {"impact": 8, "tilt_change": 9, "post_fall_monitor": 10}
 
 
 class GraphicalInterface:
@@ -86,10 +93,21 @@ class GraphicalInterface:
             value_label.pack()
             self.event_labels.append(value_label)
 
+        # ------------ RIGHT SIDE: LOG OF CRITICAL FLAG CHANGES ----------------
+        tk.Label(self.right_frame, text="Log", font=("Arial", 12, "bold")).pack(pady=(16, 2))
+        self.event_log = tk.Listbox(self.right_frame, height=EVENT_LOG_LINES, width=38,
+                                    font=("Courier", 10))
+        self.event_log.pack(fill=tk.X)
+        self.export_button = tk.Button(self.right_frame, text="Export log", command=self.export_log)
+        self.export_button.pack(pady=(6, 0), fill=tk.X)
+        self.log_entries = []   # (timestamp, flag, value)
+
+        self.critical_state = {k: (0, 0.0) for k in CRITICAL_FLAGS}
+        self.stream_state = {k: 0 for k in STREAM_LOG_FLAGS}
+
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.left_frame)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
-        # Thread-safe queue for incoming data
         self.data_queue = queue.Queue(maxsize=200)
 
         # Start background serial thread
@@ -99,7 +117,6 @@ class GraphicalInterface:
 
         self.ani = animation.FuncAnimation(self.fig, self.update, interval=100, blit=True)
 
-    # -----------------------------------------------------------
     def serial_reader_thread(self):
         """Reads serial at high speed without blocking the UI."""
         while True:
@@ -120,25 +137,89 @@ class GraphicalInterface:
             time.sleep(0.001)
 
 
-    # -----------------------------------------------------------
     def update_event_label(self, label: tk.Label, value: int):
-        """Updates event status label color + text"""
         if value == 1:
             label.config(text="True", fg="green")
         else:
             label.config(text="False", fg="red")
 
-    # -----------------------------------------------------------
+    def poll_critical_events(self) -> None:
+        read_event = getattr(self.connection_handler, "read_event", None)
+        if read_event is None:
+            return
+        while True:
+            item = read_event()
+            if not item:
+                break
+            t, flags = item
+            for k in CRITICAL_FLAGS:
+                if k not in flags:
+                    continue
+                old, t_rise = self.critical_state[k]
+                new = int(flags[k])
+                if new != old:
+                    self.critical_state[k] = (new, t if new else t_rise)
+                    self.log_event(t, k, new)
+
+    def track_stream_flags(self, line: str, t: float) -> None:
+        values = line.strip().split(",")
+        for flag, i in STREAM_LOG_FLAGS.items():
+            try:
+                new = int(float(values[i]))
+            except (IndexError, ValueError):
+                return
+            if new != self.stream_state[flag]:
+                self.stream_state[flag] = new
+                self.log_event(t, flag, new)
+
+    def log_event(self, t: float, flag: str, value: int) -> None:
+        self.log_entries.append((t, flag, value))
+        stamp = datetime.fromtimestamp(t).strftime("%H:%M:%S.%f")[:-3]
+        name = flag.replace("_", " ").title()
+        self.event_log.insert(0, f"{stamp}  {name:<17} {'True' if value else 'False'}")
+        self.event_log.itemconfig(0, fg="green" if value else "red")
+        if self.event_log.size() > EVENT_LOG_LINES:
+            self.event_log.delete(EVENT_LOG_LINES, tk.END)
+
+    def write_log(self, path) -> int:
+        with open(path, "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["time", "unix_time", "flag", "value"])
+            for t, flag, value in self.log_entries:
+                w.writerow([datetime.fromtimestamp(t).isoformat(timespec="milliseconds"),
+                            f"{t:.3f}", flag, value])
+        return len(self.log_entries)
+
+    def export_log(self) -> None:
+        default = datetime.now().strftime("smartguard_log_%Y%m%d_%H%M%S.csv")
+        path = filedialog.asksaveasfilename(parent=self.root, title="Export log",
+                                            initialfile=default, defaultextension=".csv",
+                                            filetypes=[("CSV", "*.csv"), ("All files", "*")])
+        if not path:
+            return
+        try:
+            n = self.write_log(path)
+        except OSError as e:
+            messagebox.showerror("Export log", f"Could not save the log:\n{e}", parent=self.root)
+            return
+        messagebox.showinfo("Export log", f"{n} entries saved to\n{path}", parent=self.root)
+
+    def critical_value(self, flag: str, stream_value: int, now: float) -> int:
+        value, t_rise = self.critical_state[flag]
+        return int(stream_value or value or (now - t_rise) < CRITICAL_HOLD_S)
+
     def update(self, _):
         # Pull all available lines from the queue (fastest way)
         while not self.data_queue.empty():
             try:
                 line = self.data_queue.get_nowait()
                 self.data_handler.update_data(line)
+                self.track_stream_flags(line, time.time())
             except queue.Empty:
                 break
 
 
+        self.poll_critical_events()
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.time_label.config(text=now)
 
@@ -161,6 +242,9 @@ class GraphicalInterface:
         detected = int(self.data_handler.env_values[11, -1])
 
         # ----- Update events on the right side -----
+        t_now = time.time()
+        freefall = self.critical_value("free_fall", freefall, t_now)
+        detected = self.critical_value("fall_detected", detected, t_now)
         values = [freefall, impact, tilt, postfall, detected]
         for label, val in zip(self.event_labels, values):
             self.update_event_label(label, val)
