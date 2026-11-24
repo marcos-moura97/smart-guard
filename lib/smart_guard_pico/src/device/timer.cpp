@@ -63,7 +63,7 @@ Timer& Timer::operator=(Timer&& timer)
     }
     this->_timer_data = std::move(timer._timer_data);
     this->_timer = std::move(timer._timer);
-    assert(!timer._process);
+    assert(!timer._timer_data);
     assert(!timer._timer);
 
     return *this;
